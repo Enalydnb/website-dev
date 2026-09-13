@@ -232,7 +232,7 @@
       <div class="card">
         <div class="card-title">Neues Event Hinzufügen</div>
         <div class="grid-form">
-          <input type="text" id="newDate" placeholder="Datum (TT.MM.JJJJ)">
+          <input type="text" id="newDate" placeholder="Datum (TT-MM-JJJJ)">
           <input type="text" id="newTitle" placeholder="Event Name / Line-Up">
           <input type="text" id="newVenue" placeholder="Location / Club">
           <input type="text" id="newCity" placeholder="Stadt">
@@ -252,7 +252,7 @@
     <div id="tabContent" style="display:none;">
       <div class="card">
         <div class="card-title">ABOUT / BIO</div>
-        <textarea id="textContentAbout" rows="5" placeholder="Bio / Über mich Text..."></textarea>
+        <textarea id="textContentAbout" rows="6" placeholder="Bio / Über mich Text..."></textarea>
       </div>
 
       <div class="card">
@@ -262,7 +262,7 @@
 
       <div class="card">
         <div class="card-title">SELECTED SHOWS</div>
-        <textarea id="textContentSelectedShows" rows="5" placeholder="Highlights / Vergangene Top Shows..."></textarea>
+        <textarea id="textContentSelectedShows" rows="4" placeholder="Highlights / Vergangene Top Shows..."></textarea>
       </div>
 
       <button class="btn-save-sticky" id="btnSaveContent" onclick="saveContentToGitHub()" style="display:none;">Texte Speichern</button>
@@ -290,8 +290,13 @@
     const filePathContent = "data/content.json";
     const assetFolderPath = "assets";
 
+    // Standardinhalte als Fallback für leeres content.json
+    const defaultAbout = "Enaly is a drum and bass DJ known for her dark and heavy sound, shaped by her roots in rock and metal. Blending powerful, hard-hitting elements with melodic passages, she creates emotionally driven sets that take listeners on a dynamic musical journey.\n\nHaving shared stages with artists such as Andy C, Culture Shock, Dimension and Wilkinson, and performed at venues like Bootshaus and Odonien as well as festivals including Nibirii and Nature One, Enaly continues to build strong momentum within the scene.\n\nAwarded Best Newcomer at the Drum and Bass Awards Germany 23/24, she is rapidly establishing herself as a rising force in drum and bass.";
+    const defaultSharedStage = "ANDY C, BLACK SUN EMPIRE, CULTURE SHOCK, DELTA HEAVY, DIMENSION, FRICTION, K MOTIONZ, KANINE, MEFJUS, PENDULUM, WILKINSON, ZOMBIE CATS";
+    const defaultSelectedShows = "NIBIRII FESTIVAL, NATURE ONE, BOOTSHAUS, ODONIEN, PROTON";
+
     let localEvents = [];
-    let localContent = { about: "", sharedStage: "", selectedShows: "" };
+    let localContent = { about: defaultAbout, sharedStage: defaultSharedStage, selectedShows: defaultSelectedShows };
     let fileShaMap = {};
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -313,7 +318,7 @@
         if (tabBtn) tabBtn.classList.toggle('active', t === tab);
       });
 
-      // Sticky Save Button anpassen
+      // Sticky Save Button je nach gewähltem Tab anpassen
       document.getElementById('btnSaveEvents').style.display = (tab === 'events') ? 'block' : 'none';
       document.getElementById('btnSaveContent').style.display = (tab === 'content') ? 'block' : 'none';
 
@@ -571,16 +576,19 @@
     // ── CONTENT / TEXTE LOGIK ──
     async function loadContentFromGitHub() {
       try {
-        const defaultJSON = JSON.stringify({ about: "", sharedStage: "", selectedShows: "" });
+        const defaultJSON = JSON.stringify({ about: defaultAbout, sharedStage: defaultSharedStage, selectedShows: defaultSelectedShows });
         const data = await getGitHubFile(filePathContent, defaultJSON);
         const decodedContent = b64_to_utf8(data.content);
         localContent = JSON.parse(decodedContent);
         
-        document.getElementById('textContentAbout').value = localContent.about || "";
-        document.getElementById('textContentSharedStage').value = localContent.sharedStage || "";
-        document.getElementById('textContentSelectedShows').value = localContent.selectedShows || "";
+        document.getElementById('textContentAbout').value = localContent.about || defaultAbout;
+        document.getElementById('textContentSharedStage').value = localContent.sharedStage || defaultSharedStage;
+        document.getElementById('textContentSelectedShows').value = localContent.selectedShows || defaultSelectedShows;
       } catch (err) {
         console.error("Content Fehler beim Laden:", err);
+        document.getElementById('textContentAbout').value = defaultAbout;
+        document.getElementById('textContentSharedStage').value = defaultSharedStage;
+        document.getElementById('textContentSelectedShows').value = defaultSelectedShows;
       }
     }
 
