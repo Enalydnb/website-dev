@@ -107,6 +107,7 @@
     .nav-links { display: flex; gap: 2rem; list-style: none; }
     .nav-links a {
       font-family: 'League Gothic', sans-serif;
+      font-weight: 400;
       font-size: 1.5rem;
       letter-spacing: 0.08em;
       color: var(--muted);
@@ -189,6 +190,7 @@
     }
     .quote-box {
       font-family: 'League Gothic', sans-serif;
+      font-weight: 400;
       font-size: 1.75rem;
       color: var(--pink);
       letter-spacing: 0.04em;
@@ -202,6 +204,7 @@
     /* ── EVENTS ── */
     .sub-heading {
       font-family: 'League Gothic', sans-serif;
+      font-weight: 400;
       font-size: 2rem;
       letter-spacing: 0.05em;
       margin-bottom: 0.75rem;
@@ -218,15 +221,17 @@
     .event-row:last-child {
       border-bottom: none;
     }
-    .event-date { font-family: 'League Gothic', sans-serif; font-size: 1.6rem; color: var(--pink); }
+    .event-date { font-family: 'League Gothic', sans-serif; font-weight: 400; font-size: 1.6rem; color: var(--pink); }
     .event-title { font-size: 1.1rem; }
     .event-loc { color: var(--muted); font-size: 0.95rem; }
     .event-ticket-link {
       text-align: right;
       font-family: 'League Gothic', sans-serif;
+      font-weight: 400;
       color: var(--text);
       text-decoration: none;
       font-size: 1.4rem;
+      letter-spacing: 0.05em;
       transition: color 0.2s ease;
     }
     .event-ticket-link:hover {
@@ -252,6 +257,7 @@
       align-items: center;
       gap: 0.6rem 1rem;
       font-family: 'League Gothic', sans-serif;
+      font-weight: 400;
       font-size: clamp(2.2rem, 4.5vw, 3.8rem);
       line-height: 1.1;
       letter-spacing: 0.04em;
@@ -278,9 +284,11 @@
     }
     .booking-left h3 {
       font-family: 'League Gothic', sans-serif;
+      font-weight: 600;
       font-size: clamp(2.5rem, 5vw, 3.8rem);
-      line-height: 0.9;
+      line-height: 0.95;
       margin-bottom: 1rem;
+      letter-spacing: 0.04em;
     }
     .booking-left p {
       color: #aaa;
@@ -322,6 +330,7 @@
       border: 1px solid var(--pink);
       color: var(--text);
       font-family: 'League Gothic', sans-serif;
+      font-weight: 400;
       padding: 0.5rem 2.2rem;
       font-size: 1.4rem;
       letter-spacing: 0.08em;
@@ -537,7 +546,7 @@
     // Strict Mobile Zoom Protection
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-    // Auto Event-Loader (30-Tage-Löschregel)
+    // Auto Event-Loader (Mit optischer Unterscheidung für Past Events & ohne Pfeile)
     async function loadEvents() {
       try {
         const res = await fetch('data/events.json');
@@ -546,25 +555,49 @@
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(now.getDate() - 30);
 
-        const upcoming = document.getElementById('upcomingEvents');
-        const past = document.getElementById('pastEvents');
+        const upcomingContainer = document.getElementById('upcomingEvents');
+        const pastContainer = document.getElementById('pastEvents');
+
+        let upcomingCount = 0;
+        let pastCount = 0;
 
         events.forEach(item => {
           const d = new Date(item.date);
           const dateStr = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
           
-          const html = `
-            <div class="event-row">
-              <div class="event-date">${dateStr}</div>
-              <div class="event-title">${item.title}</div>
-              <div class="event-loc">${item.venue} · ${item.city}</div>
-              <div>${item.tickets ? `<a href="${item.tickets}" target="_blank" class="event-ticket-link">TICKETS →</a>` : ''}</div>
-            </div>
-          `;
+          const isUpcoming = d >= now;
+          const isPast = d < now && d >= thirtyDaysAgo;
 
-          if (d >= now) upcoming.innerHTML += html;
-          else if (d >= thirtyDaysAgo) past.innerHTML += html;
+          if (isUpcoming) {
+            upcomingCount++;
+            upcomingContainer.innerHTML += `
+              <div class="event-row">
+                <div class="event-date">${dateStr}</div>
+                <div class="event-title">${item.title}</div>
+                <div class="event-loc">${item.venue} · ${item.city}</div>
+                <div>${item.tickets ? `<a href="${item.tickets}" target="_blank" class="event-ticket-link">TICKETS</a>` : ''}</div>
+              </div>
+            `;
+          } else if (isPast) {
+            pastCount++;
+            pastContainer.innerHTML += `
+              <div class="event-row" style="opacity: 0.45;">
+                <div class="event-date" style="color: var(--muted);">${dateStr}</div>
+                <div class="event-title">${item.title}</div>
+                <div class="event-loc">${item.venue} · ${item.city}</div>
+                <div style="text-align: right; font-family: 'League Gothic', sans-serif; font-weight: 400; font-size: 1.2rem; color: var(--muted); letter-spacing: 0.05em;">ENDED</div>
+              </div>
+            `;
+          }
         });
+
+        if (upcomingCount === 0) {
+          upcomingContainer.innerHTML = `<div style="color: var(--muted); font-size: 0.95rem; padding: 1rem 0;">No upcoming shows announced. Stay tuned!</div>`;
+        }
+        if (pastCount === 0) {
+          pastContainer.innerHTML = `<div style="color: var(--muted); font-size: 0.95rem; padding: 1rem 0;">No recent past shows.</div>`;
+        }
+
       } catch (err) { console.error('Error loading events:', err); }
     }
     loadEvents();
