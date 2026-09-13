@@ -231,7 +231,7 @@
       <div class="card">
         <div class="card-title">Neues Event Hinzufügen</div>
         <div class="grid-form">
-          <input type="text" id="newDate" placeholder="Datum (TT.MM.JJJJ)">
+          <input type="text" id="newDate" placeholder="Datum (TT-MM-JJJJ)">
           <input type="text" id="newTitle" placeholder="Event Name / Line-Up">
           <input type="text" id="newVenue" placeholder="Location / Club">
           <input type="text" id="newCity" placeholder="Stadt">
@@ -242,7 +242,7 @@
         </div>
       </div>
 
-      <div class="card-title" style="margin-top:1.5rem;">ALLE EVENTS (DATA/EVENTS.JSON)</div>
+      <div class="card-title" style="margin-top:1.5rem;">ALLE EVENTS</div>
       <div id="adminList">Lade Events...</div>
       <button class="btn-save-sticky" onclick="saveEventsToGitHub()">Events Speichern</button>
     </div>
@@ -255,7 +255,7 @@
         <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFileUpload(this.files)">
       </div>
 
-      <div class="card-title">VORHANDENE BILDER (/ASSETS)</div>
+      <div class="card-title">VORHANDENE BILDER</div>
       <div class="assets-grid" id="assetsGrid">Lade Assets...</div>
     </div>
 
@@ -288,13 +288,23 @@
       if (tab === 'assets') loadAssetsFromGitHub();
     }
 
-    // Hilfsfunktion: Datum (TT.MM.JJJJ) parsen
-    function parseGermanDate(dateStr) {
+    // FLEXIBLE DATUMS-VERARBEITUNG: Erfordert TT-MM-JJJJ, TT.MM.JJJJ oder JJJJ-MM-TT
+    function parseDateToTimestamp(dateStr) {
       if (!dateStr) return 0;
-      if (dateStr.includes('.')) {
-        const parts = dateStr.split('.');
-        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+      const cleanStr = dateStr.trim();
+
+      // Format TT-MM-JJJJ oder TT.MM.JJJJ (z.B. 15-10-2026 oder 15.10.2026)
+      if (/^\d{1,2}[\.\-]\d{1,2}[\.\-]\d{4}$/.test(cleanStr)) {
+        const parts = cleanStr.split(/[\.\-]/);
+        return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
       }
+
+      // Format JJJJ-MM-TT (Bestandskonfiguration z.B. 2026-10-15)
+      if (/^\d{4}[\.\-]\d{1,2}[\.\-]\d{1,2}$/.test(cleanStr)) {
+        const parts = cleanStr.split(/[\.\-]/);
+        return new Date(parts[0], parts[1] - 1, parts[2]).getTime();
+      }
+
       return 0;
     }
 
@@ -314,6 +324,16 @@
     }
 
     async function saveGitHubFile(path, contentBase64, commitMessage) {
+      // SHA vor dem Speichern aktualisieren, falls nicht vorhanden (verhindert HTTP 422)
+      if (!fileShaMap[path]) {
+        try {
+          const existingFile = await getGitHubFile(path);
+          if (existingFile && existingFile.sha) {
+            fileShaMap[path] = existingFile.sha;
+          }
+        } catch (e) {}
+      }
+
       const body = {
         message: commitMessage,
         content: contentBase64,
@@ -326,13 +346,28 @@
         body: JSON.stringify(body)
       });
 
-      if (!res.ok) throw new Error(`Speichern fehlgeschlagen: HTTP ${res.status}`);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${res.status}`);
+      }
+
       const data = await res.json();
-      fileShaMap[path] = data.content.sha;
+      if (data.content && data.content.sha) {
+        fileShaMap[path] = data.content.sha;
+      }
       return data;
     }
 
     async function deleteGitHubFile(path, commitMessage) {
+      if (!fileShaMap[path]) {
+        try {
+          const existingFile = await getGitHubFile(path);
+          if (existingFile && existingFile.sha) {
+            fileShaMap[path] = existingFile.sha;
+          }
+        } catch (e) {}
+      }
+
       const body = {
         message: commitMessage,
         sha: fileShaMap[path]
@@ -344,7 +379,10 @@
         body: JSON.stringify(body)
       });
 
-      if (!res.ok) throw new Error(`Löschen fehlgeschlagen: HTTP ${res.status}`);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${res.status}`);
+      }
     }
 
     function utf8_to_b64(str) {
@@ -373,8 +411,8 @@
       const now = new Date().setHours(0, 0, 0, 0);
       
       localEvents.sort((a, b) => {
-        const timeA = parseGermanDate(a.date);
-        const timeB = parseGermanDate(b.date);
+        const timeA = parseDateToTimestamp(a.date);
+        const timeB = parseDateToTimestamp(b.date);
         const aIsFuture = timeA >= now;
         const bIsFuture = timeB >= now;
 
@@ -391,16 +429,19 @@
       const list = document.getElementById('adminList');
       list.innerHTML = localEvents.length ? '' : '<p style="color:var(--muted)">Keine Events vorhanden.</p>';
 
+      const now = new Date().setHours(0, 0, 0, 0);
+
       localEvents.forEach((ev, index) => {
         const ticketInfo = ev.tickets ? `| Ticket: <a href="${escapeHtml(ev.tickets)}" target="_blank" style="color:var(--pink)">[Link]</a>` : '';
-        const isPast = parseGermanDate(ev.date) < new Date().setHours(0,0,0,0);
+        const eventTime = parseDateToTimestamp(ev.date);
+        const isPast = eventTime < now;
         const opacity = isPast ? '0.5' : '1';
         
         list.innerHTML += `
           <div class="list-item" id="item-${index}" style="opacity: ${opacity};">
             <div class="list-row-view" id="view-${index}">
               <div class="list-item-info">
-                <strong>${ev.date} – ${escapeHtml(ev.title)}</strong>
+                <strong>${escapeHtml(ev.date)} – ${escapeHtml(ev.title)}</strong>
                 <span>Location: ${escapeHtml(ev.venue || 'TBA')} (${escapeHtml(ev.city || 'TBA')}) ${ticketInfo} ${isPast ? ' <i>(Vergangen)</i>' : ''}</span>
               </div>
               <div class="controls">
@@ -412,7 +453,7 @@
             <div class="edit-form" id="editForm-${index}">
               <h4 style="color:var(--pink); margin-bottom:0.8rem; font-size:0.9rem; text-transform:uppercase;">Event bearbeiten</h4>
               <div class="grid-form" style="margin-bottom:0.75rem;">
-                <input type="text" id="editDate-${index}" value="${escapeHtml(ev.date || '')}" placeholder="Datum (TT.MM.JJJJ)">
+                <input type="text" id="editDate-${index}" value="${escapeHtml(ev.date || '')}" placeholder="Datum (TT-MM-JJJJ)">
                 <input type="text" id="editTitle-${index}" value="${escapeHtml(ev.title || '')}" placeholder="Event Name">
                 <input type="text" id="editVenue-${index}" value="${escapeHtml(ev.venue || '')}" placeholder="Location / Club">
                 <input type="text" id="editCity-${index}" value="${escapeHtml(ev.city || '')}" placeholder="Stadt">
@@ -478,7 +519,7 @@
 
     async function saveEventsToGitHub() {
       try {
-        localEvents.sort((a, b) => parseGermanDate(a.date) - parseGermanDate(b.date));
+        localEvents.sort((a, b) => parseDateToTimestamp(a.date) - parseDateToTimestamp(b.date));
         const jsonString = JSON.stringify(localEvents, null, 2);
         const base64Content = utf8_to_b64(jsonString);
         await saveGitHubFile(filePathEvents, base64Content, "Update events.json via Admin Dashboard");
