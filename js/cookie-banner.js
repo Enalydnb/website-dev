@@ -39,62 +39,91 @@
         font-family: 'Manrope', sans-serif;
         color: #F2F2F2;
         box-sizing: border-box;
+        overflow: hidden;
       }
-      #cookie-banner-overlay strong {
-        color: #FF006E;
-        font-size: 0.85rem;
+
+      .cookie-title {
+        font-family: 'League Gothic', sans-serif;
+        font-weight: 400;
+        font-size: clamp(1.4rem, 5vw, 1.8rem);
+        color: #F2F2F2;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        display: block;
-        margin-bottom: 0.4rem;
+        line-height: 1.1;
+        margin-bottom: 0.6rem;
+        word-break: break-word;
+        overflow-wrap: break-word;
       }
-      #cookie-banner-overlay p {
-        font-size: 0.82rem;
-        line-height: 1.45;
+
+      .cookie-text {
+        font-size: 0.85rem;
+        line-height: 1.5;
         color: #aaaaaa;
-        margin: 0 0 1rem 0;
+        margin: 0 0 1.2rem 0;
       }
-      #cookie-banner-overlay a {
+
+      .cookie-text a {
         color: #FF006E;
         text-decoration: underline;
       }
+
       .cookie-buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
         gap: 0.6rem;
+        width: 100%;
       }
+
       .cookie-btn {
+        flex: 1;
         font-family: 'League Gothic', sans-serif;
+        font-weight: 400;
         font-size: 1.25rem;
         letter-spacing: 0.05em;
         text-transform: uppercase;
-        padding: 0.4rem 0.8rem;
+        padding: 0.5rem 0.8rem;
         border-radius: 4px;
         cursor: pointer;
         border: none;
         text-align: center;
         transition: all 0.2s ease;
+        white-space: nowrap;
       }
+
       .cookie-btn-accept {
         background: #FF006E;
         color: #ffffff;
       }
+
       .cookie-btn-accept:hover {
         background: #d4005b;
       }
+
       .cookie-btn-decline {
         background: rgba(255, 255, 255, 0.05);
         color: #cccccc;
         border: 1px solid rgba(255, 255, 255, 0.1);
       }
+
       .cookie-btn-decline:hover {
         background: rgba(255, 255, 255, 0.1);
       }
+
       @media (max-width: 480px) {
         #cookie-banner-overlay {
-          bottom: 0.5rem;
-          width: calc(100% - 1.2rem);
+          bottom: 0.75rem;
+          width: calc(100% - 1.5rem);
           padding: 1rem;
+        }
+
+        .cookie-buttons {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .cookie-btn {
+          width: 100%;
+          padding: 0.6rem 0.5rem;
+          font-size: 1.2rem;
         }
       }
     `;
@@ -108,13 +137,13 @@
     const banner = document.createElement('div');
     banner.id = 'cookie-banner-overlay';
     banner.innerHTML = `
-      <div>
-        <strong>DATENSCHUTZ & COOKIES</strong>
-        <p>Wir nutzen technisch notwendige Cookies, um die Funktion der Website zu gewährleisten. Weitere Infos findest du in der <a href="datenschutz">Datenschutzerklärung</a>.</p>
-      </div>
+      <div class="cookie-title">Datenschutzeinstellungen</div>
+      <p class="cookie-text">
+        Wir nutzen technisch notwendige Cookies, um die Funktion der Website zu gewährleisten. Weitere Infos findest du in unserer <a href="datenschutz">Datenschutzerklärung</a>.
+      </p>
       <div class="cookie-buttons">
-        <button class="cookie-btn cookie-btn-decline" id="cookieDecline">Ablehnen</button>
-        <button class="cookie-btn cookie-btn-accept" id="cookieAccept">Akzeptieren</button>
+        <button class="cookie-btn cookie-btn-decline" id="cookieDecline">Nur Essenzielle</button>
+        <button class="cookie-btn cookie-btn-accept" id="cookieAccept">Alle Akzeptieren</button>
       </div>
     `;
 
