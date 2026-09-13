@@ -370,7 +370,6 @@
 
     /* ── MOBILE OPTIMIERUNGEN ── */
     @media (max-width: 850px) {
-      /* Headerbild geht mobil nahtlos über die volle Breite */
       header {
         padding-top: 4.2rem;
         margin-bottom: 1.25rem;
@@ -386,14 +385,13 @@
 
       .section-card { padding: 1.5rem; }
 
-      /* About: Text zuerst, Bild darunter */
       .about-grid {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
       }
       .about-left {
-        order: 2; /* Verschiebt das Portrait unter den Text */
+        order: 2;
         width: 100%;
       }
       .about-right {
@@ -421,7 +419,7 @@
 </head>
 <body id="top">
 
-  <!-- ── FIXIERTE NAVIGATION (FULL-WIDTH LEISTE) ── -->
+  <!-- ── FIXIERTE NAVIGATION ── -->
   <nav class="sticky-nav">
     <a href="/" aria-label="ENALY Home"><img src="assets/logo.png" alt="ENALY Logo" class="nav-logo-img"></a>
     <ul class="nav-links">
@@ -571,9 +569,9 @@
       <div class="footer-bottom">
         <p>© 2026 ENALY. All rights reserved.</p>
         <p>
-          <a href="#" onclick="window.reopenCookieBanner(); return false;">Cookie-Einstellungen</a> · 
-          <a href="impressum.html">Impressum</a> · 
-          <a href="datenschutz.html">Datenschutz</a>
+          <a href="#" onclick="if(window.reopenCookieBanner) window.reopenCookieBanner(); return false;">Cookie-Einstellungen</a> · 
+          <a href="impressum">Impressum</a> · 
+          <a href="datenschutz">Datenschutz</a>
         </p>
       </div>
     </footer>
