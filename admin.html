@@ -206,6 +206,9 @@
       .btn-save-sticky { width: calc(100% - 2rem); padding: 0.65rem; font-size: 1.2rem; }
     }
   </style>
+
+  <!-- CONFIG DATEI EINBINDEN -->
+  <script src="js/config.js"></script>
 </head>
 <body>
 
@@ -262,10 +265,6 @@
     // Mobile Zoom Protection
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-    // ── FEST HINTERLEGTE GITHUB ZUGANGSDATEN ──
-    const ghRepo = "Enalydnb/website-dev";
-    const ghToken = "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"; // Dein echtes Fine-grained Token hier einfügen
-
     const filePathEvents = "data/events.json";
     const assetFolderPath = "assets";
 
@@ -273,6 +272,10 @@
     let fileShaMap = {};
 
     window.addEventListener('DOMContentLoaded', () => {
+      if (typeof ghRepo === 'undefined' || typeof ghToken === 'undefined') {
+        document.getElementById('adminList').innerHTML = '<p style="color:var(--pink)">Fehler: config.js wurde nicht gefunden oder ist unvollständig!</p>';
+        return;
+      }
       loadEventsFromGitHub();
       loadAssetsFromGitHub();
     });
@@ -295,12 +298,13 @@
       return 0;
     }
 
-    // ── GITHUB API CORE HELPERS (BEARER AUTH) ──
+    // ── GITHUB API CORE HELPERS ──
     async function getGitHubFile(path) {
       const res = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${path}`, {
         headers: { 
           'Authorization': `Bearer ${ghToken}`, 
-          'Accept': 'application/vnd.github.v3+json' 
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Enaly-Admin-Dashboard'
         }
       });
       
@@ -308,7 +312,7 @@
         return { isNew: true, content: utf8_to_b64("[]") };
       }
       
-      if (res.status === 401) throw new Error("401 Unauthorized – Ungültiges oder abgelaufenes GitHub Token.");
+      if (res.status === 401) throw new Error("401 Unauthorized – Bitte prüfe Token und Repository-Namen in der config.js.");
       if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
       
       const data = await res.json();
@@ -328,12 +332,13 @@
         headers: {
           'Authorization': `Bearer ${ghToken}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/vnd.github.v3+json'
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Enaly-Admin-Dashboard'
         },
         body: JSON.stringify(body)
       });
 
-      if (res.status === 401) throw new Error("401 Unauthorized – Ungültiges oder abgelaufenes GitHub Token.");
+      if (res.status === 401) throw new Error("401 Unauthorized – Ungültiges GitHub Token.");
       if (!res.ok) throw new Error(`Speichern fehlgeschlagen: HTTP ${res.status}`);
       const data = await res.json();
       fileShaMap[path] = data.content.sha;
@@ -351,12 +356,13 @@
         headers: {
           'Authorization': `Bearer ${ghToken}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/vnd.github.v3+json'
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Enaly-Admin-Dashboard'
         },
         body: JSON.stringify(body)
       });
 
-      if (res.status === 401) throw new Error("401 Unauthorized – Ungültiges oder abgelaufenes GitHub Token.");
+      if (res.status === 401) throw new Error("401 Unauthorized – Ungültiges GitHub Token.");
       if (!res.ok) throw new Error(`Löschen fehlgeschlagen: HTTP ${res.status}`);
     }
 
@@ -507,7 +513,8 @@
         const res = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${assetFolderPath}`, {
           headers: { 
             'Authorization': `Bearer ${ghToken}`, 
-            'Accept': 'application/vnd.github.v3+json' 
+            'Accept': 'application/vnd.github.v3+json',
+            'User-Agent': 'Enaly-Admin-Dashboard'
           }
         });
         
