@@ -92,6 +92,21 @@
         padding: 1rem 1.5rem;
       }
     }
+
+    @media (max-width: 768px) {
+      nav.sticky-nav {
+        padding: 0.8rem 1rem;
+      }
+      .nav-logo-img {
+        height: 22px;
+      }
+      .nav-links {
+        gap: 1.2rem;
+      }
+      .nav-links a {
+        font-size: 1.25rem;
+      }
+    }
     
     .nav-logo-img { 
       height: 28px; 
@@ -585,24 +600,21 @@
     // Strict Mobile Zoom Protection
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-    // Auto Content-Loader (Lädt Bio, Shared Stage & Selected Shows aus content.json)
+    // Auto Content-Loader (Bio, Shared Stage, Selected Shows)
     async function loadContent() {
       try {
         const res = await fetch('data/content.json');
         if (!res.ok) return;
         const content = await res.json();
 
-        // 1. About Text einsetzen
         if (content.about && content.about.trim() !== "") {
           const paragraphs = content.about.split('\n').filter(p => p.trim() !== "");
           const container = document.getElementById('aboutTextContainer');
-          
           let html = paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join('');
           html += `<div class="quote-box">"I like drum and bass more than people"</div>`;
           container.innerHTML = html;
         }
 
-        // 2. Shared Stage Einsetzen
         if (content.sharedStage && content.sharedStage.trim() !== "") {
           const items = content.sharedStage.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== "");
           const container = document.getElementById('sharedStageContainer');
@@ -614,7 +626,6 @@
           }
         }
 
-        // 3. Selected Shows Einsetzen
         if (content.selectedShows && content.selectedShows.trim() !== "") {
           const items = content.selectedShows.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== "");
           const container = document.getElementById('selectedShowsContainer');
@@ -636,57 +647,62 @@
 
     loadContent();
 
-    // Auto Event-Loader
+    // Auto Event-Loader (Zeigt exakt die 5 neusten vergangenen Dates)
     async function loadEvents() {
       try {
         const res = await fetch('data/events.json');
         const events = await res.json();
-        const now = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(now.getDate() - 30);
+        const now = new Date().setHours(0, 0, 0, 0);
 
         const upcomingContainer = document.getElementById('upcomingEvents');
         const pastContainer = document.getElementById('pastEvents');
 
-        let upcomingCount = 0;
-        let pastCount = 0;
+        let upcomingList = [];
+        let pastList = [];
 
         events.forEach(item => {
           const d = parseDate(item.date);
-          const dateStr = item.date;
+          const timestamp = d.getTime();
           
-          const isUpcoming = d >= now;
-          const isPast = d < now && d >= thirtyDaysAgo;
-
-          if (isUpcoming) {
-            upcomingCount++;
-            upcomingContainer.innerHTML += `
-              <div class="event-row">
-                <div class="event-date">${dateStr}</div>
-                <div class="event-title">${escapeHtml(item.title)}</div>
-                <div class="event-loc">${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</div>
-                <div>${item.tickets ? `<a href="${escapeHtml(item.tickets)}" target="_blank" class="event-ticket-link">TICKETS</a>` : ''}</div>
-              </div>
-            `;
-          } else if (isPast) {
-            pastCount++;
-            pastContainer.innerHTML += `
-              <div class="event-row" style="opacity: 0.45;">
-                <div class="event-date" style="color: var(--muted);">${dateStr}</div>
-                <div class="event-title">${escapeHtml(item.title)}</div>
-                <div class="event-loc">${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</div>
-                <div></div>
-              </div>
-            `;
+          if (timestamp >= now) {
+            upcomingList.push({ ...item, timestamp });
+          } else {
+            pastList.push({ ...item, timestamp });
           }
         });
 
-        if (upcomingCount === 0) {
-          upcomingContainer.innerHTML = `<div style="color: var(--muted); font-size: 0.95rem; padding: 1rem 0;">No upcoming shows announced. Stay tuned!</div>`;
-        }
-        if (pastCount === 0) {
-          pastContainer.innerHTML = `<div style="color: var(--muted); font-size: 0.95rem; padding: 1rem 0;">No recent past shows.</div>`;
-        }
+        // Sortieren: Upcoming aufsteigend, Past absteigend (neuste zuerst)
+        upcomingList.sort((a, b) => a.timestamp - b.timestamp);
+        pastList.sort((a, b) => b.timestamp - a.timestamp);
+
+        // Nur die letzten 5 vergangenen Shows nehmen
+        const recentPastList = pastList.slice(0, 5);
+
+        // Upcoming rendern
+        upcomingContainer.innerHTML = upcomingList.length ? '' : `<div style="color: var(--muted); font-size: 0.95rem; padding: 1rem 0;">No upcoming shows announced. Stay tuned!</div>`;
+        upcomingList.forEach(item => {
+          upcomingContainer.innerHTML += `
+            <div class="event-row">
+              <div class="event-date">${escapeHtml(item.date)}</div>
+              <div class="event-title">${escapeHtml(item.title)}</div>
+              <div class="event-loc">${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</div>
+              <div>${item.tickets ? `<a href="${escapeHtml(item.tickets)}" target="_blank" class="event-ticket-link">TICKETS</a>` : ''}</div>
+            </div>
+          `;
+        });
+
+        // Past rendern (Maximal 5)
+        pastContainer.innerHTML = recentPastList.length ? '' : `<div style="color: var(--muted); font-size: 0.95rem; padding: 1rem 0;">No recent past shows.</div>`;
+        recentPastList.forEach(item => {
+          pastContainer.innerHTML += `
+            <div class="event-row" style="opacity: 0.45;">
+              <div class="event-date" style="color: var(--muted);">${escapeHtml(item.date)}</div>
+              <div class="event-title">${escapeHtml(item.title)}</div>
+              <div class="event-loc">${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</div>
+              <div></div>
+            </div>
+          `;
+        });
 
       } catch (err) { console.error('Error loading events:', err); }
     }
@@ -707,7 +723,7 @@
 
     loadEvents();
 
-    // Scrollspy für automatische Hervorhebung der Nav-Links beim Scrollen
+    // Scrollspy
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav-links a');
 
