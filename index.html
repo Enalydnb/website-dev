@@ -445,7 +445,7 @@
         <div class="about-left">
           <img src="assets/about.jpg" alt="Enaly Portrait" class="about-portrait">
         </div>
-        <div class="about-right">
+        <div class="about-right" id="aboutTextContainer">
           <p>Enaly is a drum and bass DJ known for her dark and heavy sound, shaped by her roots in rock and metal. Blending powerful, hard-hitting elements with melodic passages, she creates emotionally driven sets that take listeners on a dynamic musical journey.</p>
           <p>Having shared stages with artists such as Andy C, Culture Shock, Dimension and Wilkinson, and performed at venues like Bootshaus and Odonien as well as festivals including Nibirii and Nature One, Enaly continues to build strong momentum within the scene.</p>
           <p>Awarded Best Newcomer at the Drum and Bass Awards Germany 23/24, she is rapidly establishing herself as a rising force in drum and bass.</p>
@@ -468,7 +468,7 @@
     <section class="section-card">
       <div class="ref-wrapper">
         <div class="ref-label">SHARED THE STAGE WITH</div>
-        <div class="ref-container">
+        <div class="ref-container" id="sharedStageContainer">
           <div class="ref-item">ANDY C <span class="dot">■</span></div>
           <div class="ref-item">BLACK SUN EMPIRE <span class="dot">■</span></div>
           <div class="ref-item">CULTURE SHOCK <span class="dot">■</span></div>
@@ -484,7 +484,7 @@
         </div>
 
         <div class="ref-label" style="margin-top: 3rem;">SELECTED SHOWS</div>
-        <div class="ref-container">
+        <div class="ref-container" id="selectedShowsContainer">
           <div class="ref-item">NIBIRII FESTIVAL <span class="dot">■</span></div>
           <div class="ref-item">NATURE ONE <span class="dot">■</span></div>
           <div class="ref-item">BOOTSHAUS <span class="dot">■</span></div>
@@ -585,6 +585,57 @@
     // Strict Mobile Zoom Protection
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
+    // Auto Content-Loader (Lädt Bio, Shared Stage & Selected Shows aus content.json)
+    async function loadContent() {
+      try {
+        const res = await fetch('data/content.json');
+        if (!res.ok) return;
+        const content = await res.json();
+
+        // 1. About Text einsetzen
+        if (content.about && content.about.trim() !== "") {
+          const paragraphs = content.about.split('\n').filter(p => p.trim() !== "");
+          const container = document.getElementById('aboutTextContainer');
+          
+          let html = paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join('');
+          html += `<div class="quote-box">"I like drum and bass more than people"</div>`;
+          container.innerHTML = html;
+        }
+
+        // 2. Shared Stage Einsetzen
+        if (content.sharedStage && content.sharedStage.trim() !== "") {
+          const items = content.sharedStage.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== "");
+          const container = document.getElementById('sharedStageContainer');
+          if (items.length > 0) {
+            container.innerHTML = items.map((item, idx) => {
+              const showDot = idx < items.length - 1;
+              return `<div class="ref-item">${escapeHtml(item.toUpperCase())} ${showDot ? '<span class="dot">■</span>' : ''}</div>`;
+            }).join('');
+          }
+        }
+
+        // 3. Selected Shows Einsetzen
+        if (content.selectedShows && content.selectedShows.trim() !== "") {
+          const items = content.selectedShows.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== "");
+          const container = document.getElementById('selectedShowsContainer');
+          if (items.length > 0) {
+            container.innerHTML = items.map((item, idx) => {
+              const showDot = idx < items.length - 1;
+              return `<div class="ref-item">${escapeHtml(item.toUpperCase())} ${showDot ? '<span class="dot">■</span>' : ''}</div>`;
+            }).join('');
+          }
+        }
+      } catch (err) {
+        console.error('Error loading content:', err);
+      }
+    }
+
+    function escapeHtml(text) {
+      return (text || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    loadContent();
+
     // Auto Event-Loader
     async function loadEvents() {
       try {
@@ -601,8 +652,8 @@
         let pastCount = 0;
 
         events.forEach(item => {
-          const d = new Date(item.date);
-          const dateStr = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          const d = parseDate(item.date);
+          const dateStr = item.date;
           
           const isUpcoming = d >= now;
           const isPast = d < now && d >= thirtyDaysAgo;
@@ -612,9 +663,9 @@
             upcomingContainer.innerHTML += `
               <div class="event-row">
                 <div class="event-date">${dateStr}</div>
-                <div class="event-title">${item.title}</div>
-                <div class="event-loc">${item.venue} · ${item.city}</div>
-                <div>${item.tickets ? `<a href="${item.tickets}" target="_blank" class="event-ticket-link">TICKETS</a>` : ''}</div>
+                <div class="event-title">${escapeHtml(item.title)}</div>
+                <div class="event-loc">${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</div>
+                <div>${item.tickets ? `<a href="${escapeHtml(item.tickets)}" target="_blank" class="event-ticket-link">TICKETS</a>` : ''}</div>
               </div>
             `;
           } else if (isPast) {
@@ -622,8 +673,8 @@
             pastContainer.innerHTML += `
               <div class="event-row" style="opacity: 0.45;">
                 <div class="event-date" style="color: var(--muted);">${dateStr}</div>
-                <div class="event-title">${item.title}</div>
-                <div class="event-loc">${item.venue} · ${item.city}</div>
+                <div class="event-title">${escapeHtml(item.title)}</div>
+                <div class="event-loc">${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</div>
                 <div></div>
               </div>
             `;
@@ -639,6 +690,21 @@
 
       } catch (err) { console.error('Error loading events:', err); }
     }
+
+    function parseDate(dateStr) {
+      if (!dateStr) return new Date(0);
+      const cleanStr = dateStr.trim();
+      if (/^\d{1,2}[\.\-]\d{1,2}[\.\-]\d{4}$/.test(cleanStr)) {
+        const parts = cleanStr.split(/[\.\-]/);
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+      }
+      if (/^\d{4}[\.\-]\d{1,2}[\.\-]\d{1,2}$/.test(cleanStr)) {
+        const parts = cleanStr.split(/[\.\-]/);
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+      return new Date(dateStr);
+    }
+
     loadEvents();
 
     // Scrollspy für automatische Hervorhebung der Nav-Links beim Scrollen

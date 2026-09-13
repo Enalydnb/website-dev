@@ -223,6 +223,7 @@
     <!-- TABS NAVIGATION -->
     <div class="nav-tabs">
       <button class="nav-tab active" id="tabBtnEvents" onclick="switchTab('events')">Events</button>
+      <button class="nav-tab" id="tabBtnContent" onclick="switchTab('content')">Content / Texte</button>
       <button class="nav-tab" id="tabBtnAssets" onclick="switchTab('assets')">Assets</button>
     </div>
 
@@ -231,7 +232,7 @@
       <div class="card">
         <div class="card-title">Neues Event Hinzufügen</div>
         <div class="grid-form">
-          <input type="text" id="newDate" placeholder="Datum (TT-MM-JJJJ)">
+          <input type="text" id="newDate" placeholder="Datum (TT.MM.JJJJ)">
           <input type="text" id="newTitle" placeholder="Event Name / Line-Up">
           <input type="text" id="newVenue" placeholder="Location / Club">
           <input type="text" id="newCity" placeholder="Stadt">
@@ -244,10 +245,30 @@
 
       <div class="card-title" style="margin-top:1.5rem;">ALLE EVENTS</div>
       <div id="adminList">Lade Events...</div>
-      <button class="btn-save-sticky" onclick="saveEventsToGitHub()">Events Speichern</button>
+      <button class="btn-save-sticky" id="btnSaveEvents" onclick="saveEventsToGitHub()">Events Speichern</button>
     </div>
 
-    <!-- ── TAB 2: ASSETS ── -->
+    <!-- ── TAB 2: CONTENT / TEXTE ── -->
+    <div id="tabContent" style="display:none;">
+      <div class="card">
+        <div class="card-title">ABOUT / BIO</div>
+        <textarea id="textContentAbout" rows="5" placeholder="Bio / Über mich Text..."></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SHARED THE STAGE WITH</div>
+        <textarea id="textContentSharedStage" rows="4" placeholder="Künstler / Acts (kommagetrennt oder mehrzeilig)..."></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SELECTED SHOWS</div>
+        <textarea id="textContentSelectedShows" rows="5" placeholder="Highlights / Vergangene Top Shows..."></textarea>
+      </div>
+
+      <button class="btn-save-sticky" id="btnSaveContent" onclick="saveContentToGitHub()" style="display:none;">Texte Speichern</button>
+    </div>
+
+    <!-- ── TAB 3: ASSETS ── -->
     <div id="tabAssets" style="display:none;">
       <div class="card" style="text-align:center; padding:2.5rem 1rem; border:2px dashed var(--card-border); cursor:pointer;" onclick="document.getElementById('fileInput').click()">
         📁 <strong>Datei hochladen (Direkt auf GitHub)</strong>
@@ -266,9 +287,11 @@
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
     const filePathEvents = "data/events.json";
+    const filePathContent = "data/content.json";
     const assetFolderPath = "assets";
 
     let localEvents = [];
+    let localContent = { about: "", sharedStage: "", selectedShows: "" };
     let fileShaMap = {};
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -277,29 +300,39 @@
         return;
       }
       loadEventsFromGitHub();
+      loadContentFromGitHub();
       loadAssetsFromGitHub();
     });
 
     function switchTab(tab) {
-      ['events', 'assets'].forEach(t => {
-        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = (t === tab) ? 'block' : 'none';
-        document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+      const tabs = ['events', 'content', 'assets'];
+      tabs.forEach(t => {
+        const tabEl = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+        const tabBtn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (tabEl) tabEl.style.display = (t === tab) ? 'block' : 'none';
+        if (tabBtn) tabBtn.classList.toggle('active', t === tab);
       });
+
+      // Sticky Save Button anpassen
+      document.getElementById('btnSaveEvents').style.display = (tab === 'events') ? 'block' : 'none';
+      document.getElementById('btnSaveContent').style.display = (tab === 'content') ? 'block' : 'none';
+
       if (tab === 'assets') loadAssetsFromGitHub();
     }
 
-    // FLEXIBLE DATUMS-VERARBEITUNG: Erfordert TT-MM-JJJJ, TT.MM.JJJJ oder JJJJ-MM-TT
+    function cleanPath(path) {
+      return (path || '').replace(/^\/+/, '');
+    }
+
     function parseDateToTimestamp(dateStr) {
       if (!dateStr) return 0;
       const cleanStr = dateStr.trim();
 
-      // Format TT-MM-JJJJ oder TT.MM.JJJJ (z.B. 15-10-2026 oder 15.10.2026)
       if (/^\d{1,2}[\.\-]\d{1,2}[\.\-]\d{4}$/.test(cleanStr)) {
         const parts = cleanStr.split(/[\.\-]/);
         return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
       }
 
-      // Format JJJJ-MM-TT (Bestandskonfiguration z.B. 2026-10-15)
       if (/^\d{4}[\.\-]\d{1,2}[\.\-]\d{1,2}$/.test(cleanStr)) {
         const parts = cleanStr.split(/[\.\-]/);
         return new Date(parts[0], parts[1] - 1, parts[2]).getTime();
@@ -309,27 +342,30 @@
     }
 
     // ── API HELPERS ÜBER CLOUDFLARE WORKER PROXY ──
-    async function getGitHubFile(path) {
-      const res = await fetch(`${proxyApiUrl}/${path}`);
+    async function getGitHubFile(path, defaultFallback = "[]") {
+      const safePath = cleanPath(path);
+      const res = await fetch(`${proxyApiUrl}/${safePath}`);
       
       if (res.status === 404) {
-        return { isNew: true, content: utf8_to_b64("[]") };
+        return { isNew: true, content: utf8_to_b64(defaultFallback) };
       }
       
       if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
       
       const data = await res.json();
+      fileShaMap[safePath] = data.sha;
       fileShaMap[path] = data.sha;
       return data;
     }
 
     async function saveGitHubFile(path, contentBase64, commitMessage) {
-      // SHA vor dem Speichern aktualisieren, falls nicht vorhanden (verhindert HTTP 422)
-      if (!fileShaMap[path]) {
+      const safePath = cleanPath(path);
+      
+      if (!fileShaMap[safePath]) {
         try {
-          const existingFile = await getGitHubFile(path);
+          const existingFile = await getGitHubFile(safePath);
           if (existingFile && existingFile.sha) {
-            fileShaMap[path] = existingFile.sha;
+            fileShaMap[safePath] = existingFile.sha;
           }
         } catch (e) {}
       }
@@ -337,10 +373,10 @@
       const body = {
         message: commitMessage,
         content: contentBase64,
-        sha: fileShaMap[path] || undefined
+        sha: fileShaMap[safePath] || undefined
       };
 
-      const res = await fetch(`${proxyApiUrl}/${path}`, {
+      const res = await fetch(`${proxyApiUrl}/${safePath}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -353,27 +389,30 @@
 
       const data = await res.json();
       if (data.content && data.content.sha) {
+        fileShaMap[safePath] = data.content.sha;
         fileShaMap[path] = data.content.sha;
       }
       return data;
     }
 
     async function deleteGitHubFile(path, commitMessage) {
-      if (!fileShaMap[path]) {
+      const safePath = cleanPath(path);
+
+      if (!fileShaMap[safePath]) {
         try {
-          const existingFile = await getGitHubFile(path);
+          const existingFile = await getGitHubFile(safePath);
           if (existingFile && existingFile.sha) {
-            fileShaMap[path] = existingFile.sha;
+            fileShaMap[safePath] = existingFile.sha;
           }
         } catch (e) {}
       }
 
       const body = {
         message: commitMessage,
-        sha: fileShaMap[path]
+        sha: fileShaMap[safePath]
       };
 
-      const res = await fetch(`${proxyApiUrl}/${path}`, {
+      const res = await fetch(`${proxyApiUrl}/${safePath}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -397,7 +436,7 @@
     // ── EVENTS LOGIK ──
     async function loadEventsFromGitHub() {
       try {
-        const data = await getGitHubFile(filePathEvents);
+        const data = await getGitHubFile(filePathEvents, "[]");
         const decodedContent = b64_to_utf8(data.content);
         localEvents = JSON.parse(decodedContent);
         if (!Array.isArray(localEvents)) localEvents = [];
@@ -529,10 +568,44 @@
       }
     }
 
+    // ── CONTENT / TEXTE LOGIK ──
+    async function loadContentFromGitHub() {
+      try {
+        const defaultJSON = JSON.stringify({ about: "", sharedStage: "", selectedShows: "" });
+        const data = await getGitHubFile(filePathContent, defaultJSON);
+        const decodedContent = b64_to_utf8(data.content);
+        localContent = JSON.parse(decodedContent);
+        
+        document.getElementById('textContentAbout').value = localContent.about || "";
+        document.getElementById('textContentSharedStage').value = localContent.sharedStage || "";
+        document.getElementById('textContentSelectedShows').value = localContent.selectedShows || "";
+      } catch (err) {
+        console.error("Content Fehler beim Laden:", err);
+      }
+    }
+
+    async function saveContentToGitHub() {
+      try {
+        localContent = {
+          about: document.getElementById('textContentAbout').value,
+          sharedStage: document.getElementById('textContentSharedStage').value,
+          selectedShows: document.getElementById('textContentSelectedShows').value
+        };
+
+        const jsonString = JSON.stringify(localContent, null, 2);
+        const base64Content = utf8_to_b64(jsonString);
+        await saveGitHubFile(filePathContent, base64Content, "Update content.json via Admin Dashboard");
+        alert("Texte erfolgreich auf GitHub gespeichert!");
+      } catch (err) {
+        alert("Fehler beim Speichern der Texte: " + err.message);
+      }
+    }
+
     // ── ASSETS LOGIK ──
     async function loadAssetsFromGitHub() {
       try {
-        const res = await fetch(`${proxyApiUrl}/${assetFolderPath}`);
+        const safePath = cleanPath(assetFolderPath);
+        const res = await fetch(`${proxyApiUrl}/${safePath}`);
         
         if (res.status === 404) {
            document.getElementById('assetsGrid').innerHTML = '<p style="color:var(--muted)">Ordner /assets existiert noch nicht auf GitHub.</p>';
@@ -547,6 +620,8 @@
         
         files.forEach(file => {
           if (file.type === 'file') {
+            const fileSafePath = cleanPath(file.path);
+            fileShaMap[fileSafePath] = file.sha;
             fileShaMap[file.path] = file.sha;
             grid.innerHTML += `
               <div class="asset-card">
