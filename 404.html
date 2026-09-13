@@ -359,12 +359,68 @@
     .footer-bottom a { color: var(--muted); text-decoration: none; transition: color 0.2s ease; }
     .footer-bottom a:hover { color: var(--pink); }
 
+    /* ── COOKIE CONSENT BANNER STYLES ── */
+    .cookie-banner {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(1100px - 3rem, calc(100vw - 3rem));
+      z-index: 2000;
+      background: rgba(14, 14, 16, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      display: none; /* Standardmäßig aus */
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+
+    .cookie-banner.show {
+      display: flex !important; /* Wird per JS aktiviert */
+    }
+
+    .cookie-banner p {
+      font-size: 0.85rem;
+      color: #ccc;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .cookie-banner a {
+      color: #fff;
+      text-decoration: underline;
+      text-decoration-color: var(--pink);
+    }
+
+    .cookie-btn {
+      background: var(--pink);
+      border: none;
+      color: #fff;
+      font-family: 'League Gothic', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.05em;
+      padding: 0.4rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .cookie-btn:hover {
+      opacity: 0.9;
+    }
+
     @media (max-width: 850px) {
       .section-card { padding: 1.5rem; }
       .about-grid, .booking-grid { grid-template-columns: 1fr; gap: 2rem; }
       .event-row { grid-template-columns: 1fr; gap: 0.3rem; }
       .event-ticket-link { text-align: left; }
       .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+      .cookie-banner { flex-direction: column; align-items: flex-start; gap: 1rem; }
     }
   </style>
 </head>
@@ -519,20 +575,19 @@
 
       <div class="footer-bottom">
         <p>© 2026 ENALY. All rights reserved.</p>
-        <p>
-          <a href="#" onclick="window.reopenCookieBanner(); return false;">Cookie-Einstellungen</a> · 
-          <a href="impressum.html">Impressum</a> · 
-          <a href="datenschutz.html">Datenschutz</a>
-        </p>
+        <p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
       </div>
     </footer>
 
   </div>
 
-  <!-- ── SCRIPTS ── -->
-  <!-- Cookie Banner Skript aus dem js/-Ordner -->
-  <script src="js/cookie-banner.js"></script>
+  <!-- ── COOKIE CONSENT BANNER ── -->
+  <div id="cookieBanner" class="cookie-banner">
+    <p>Wir nutzen essentielle Technologien zur Bereitstellung der Website. Weitere Infos findest du in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+    <button id="acceptCookies" class="cookie-btn">AKZEPTIEREN</button>
+  </div>
 
+  <!-- ── SCRIPTS ── -->
   <script>
     // Strict Mobile Zoom Protection
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
@@ -595,6 +650,19 @@
     }, observerOptions);
 
     sections.forEach(section => observer.observe(section));
+
+    // Reliable Cookie Banner Logic
+    const cookieBanner = document.getElementById('cookieBanner');
+    const acceptBtn = document.getElementById('acceptCookies');
+
+    if (!localStorage.getItem('cookieConsent')) {
+      cookieBanner.classList.add('show');
+    }
+
+    acceptBtn.addEventListener('click', () => {
+      localStorage.setItem('cookieConsent', 'true');
+      cookieBanner.classList.remove('show');
+    });
   </script>
 </body>
 </html>

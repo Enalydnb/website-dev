@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no"/>
+  <title>Impressum · ENALY</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡️</text></svg>">
+  
+  <style>
+    @font-face { font-family: 'League Gothic'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/league-gothic-v13-latin-regular.woff2') format('woff2'); }
+    @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/manrope-v20-latin-regular.woff2') format('woff2'); }
+
+    :root {
+      --bg: #060607;
+      --card-bg: #0E0E10;
+      --card-border: rgba(255, 255, 255, 0.05);
+      --text: #F2F2F2;
+      --pink: #FF006E;
+      --muted: #888888;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; }
+
+    nav.sticky-nav {
+      position: fixed; top: 0; left: 0; width: 100vw; z-index: 1000;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem calc((100vw - 1100px) / 2 + 1.5rem);
+      background: rgba(6, 6, 7, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+    }
+    @media (max-width: 1150px) { nav.sticky-nav { padding: 1rem 1.5rem; } }
+    .nav-logo-img { height: 28px; width: auto; filter: brightness(0) invert(1); }
+
+    .page-wrapper { max-width: 1100px; margin: 0 auto; padding: 6rem 1.5rem 3rem; }
+    .legal-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 6px; padding: 2.5rem; line-height: 1.8; color: #ccc;
+    }
+    h1 { font-family: 'League Gothic', sans-serif; font-size: 3rem; color: var(--text); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1.5rem; }
+    h2 { font-size: 1.1rem; color: var(--pink); margin: 1.5rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    a { color: var(--text); text-decoration: underline; text-decoration-color: var(--pink); }
+    a:hover { color: var(--pink); }
+  </style>
+</head>
+<body>
+
+  <nav class="sticky-nav">
+    <a href="index.html"><img src="assets/logo.png" alt="ENALY Logo" class="nav-logo-img"></a>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="legal-card">
+      <h1>Impressum</h1>
+      
+      <h2>Angaben gemäß § 5 TMG</h2>
+      <p>
+        [Dein vollständiger Vor- und Nachname]<br>
+        [Künstlername: ENALY]<br>
+        [Straße und Hausnummer]<br>
+        [PLZ und Ort]
+      </p>
+
+      <h2>Kontakt</h2>
+      <p>
+        E-Mail: <a href="mailto:info@enaly.de">info@enaly.de</a><br>
+        Website: <a href="https://enaly.de">enaly.de</a>
+      </p>
+
+      <h2>Redaktionell verantwortlich</h2>
+      <p>
+        [Dein Vor- und Nachname]<br>
+        [Straße und Hausnummer]<br>
+        [PLZ und Ort]
+      </p>
+
+      <h2>Haftung für Links</h2>
+      <p>Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen.</p>
+
+      <p style="margin-top: 2rem;"><a href="index.html">← Zurück zur Startseite</a></p>
+    </div>
+  </div>
+
+</body>
+</html>
