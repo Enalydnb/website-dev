@@ -235,7 +235,7 @@
           <input type="url"  id="newTickets" placeholder="Ticket Link (Optional)">
         </div>
         <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:1.25rem;">
-          <button class="btn-pink" onclick="addEvent()">+ Event Hinzufügen</button>
+          <button class="btn-pink" onclick="adent()">+ Event Hinzufügen</button>
         </div>
       </div>
 
@@ -260,11 +260,11 @@
 
   <script>
     // Mobile Zoom Protection
-    document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    document.adentListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
     // ── FEST HINTERLEGTE GITHUB ZUGANGSDATEN ──
     const ghRepo = "Enalydnb/website-dev";
-    const ghToken = "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";
+    const ghToken = "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";
 
     const filePathEvents = "data/events.json";
     const assetFolderPath = "assets";
