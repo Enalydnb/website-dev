@@ -235,7 +235,7 @@
           <input type="url"  id="newTickets" placeholder="Ticket Link (Optional)">
         </div>
         <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:1.25rem;">
-          <button class="btn-pink" onclick="adent()">+ Event Hinzufügen</button>
+          <button class="btn-pink" onclick="addEvent()">+ Event Hinzufügen</button>
         </div>
       </div>
 
@@ -260,11 +260,11 @@
 
   <script>
     // Mobile Zoom Protection
-    document.adentListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-    // ── FEST HINTERLEGTE GITHUB ZUGANGSDATEN ──
+    // ── FEST HINTERLEGTE GITHUB ZUGANGSDATEN (FINE-GRAINED PAT) ──
     const ghRepo = "Enalydnb/website-dev";
-    const ghToken = "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";
+    const ghToken = "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";
 
     const filePathEvents = "data/events.json";
     const assetFolderPath = "assets";
@@ -285,15 +285,12 @@
       if (tab === 'assets') loadAssetsFromGitHub();
     }
 
-    // Hilfsfunktion: Datum (TT.MM.JJJJ oder YYYY-MM-DD) parsen
+    // Hilfsfunktion: Datum (TT.MM.JJJJ) parsen
     function parseGermanDate(dateStr) {
       if (!dateStr) return 0;
       if (dateStr.includes('.')) {
         const parts = dateStr.split('.');
         if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
-      } else if (dateStr.includes('-')) {
-        const parts = dateStr.split('-');
-        if (parts.length === 3) return new Date(parts[0], parts[1] - 1, parts[2]).getTime();
       }
       return 0;
     }
@@ -306,8 +303,14 @@
           'Accept': 'application/vnd.github.v3+json' 
         }
       });
+      
+      if (res.status === 404) {
+        return { isNew: true, content: utf8_to_b64("[]") };
+      }
+      
       if (res.status === 401) throw new Error("401 Unauthorized – Ungültiges oder abgelaufenes GitHub Token.");
       if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+      
       const data = await res.json();
       fileShaMap[path] = data.sha;
       return data;
@@ -358,11 +361,12 @@
     }
 
     function utf8_to_b64(str) {
-      return window.btoa(unescape(encodeURIComponent(str)));
+      return btoa(String.fromCharCode.apply(null, new TextEncoder().encode(str)));
     }
 
     function b64_to_utf8(str) {
-      return decodeURIComponent(escape(window.atob(str)));
+      const cleanStr = str.replace(/\s/g, '');
+      return new TextDecoder().decode(Uint8Array.from(atob(cleanStr), c => c.charCodeAt(0)));
     }
 
     // ── EVENTS LOGIK ──
@@ -371,6 +375,7 @@
         const data = await getGitHubFile(filePathEvents);
         const decodedContent = b64_to_utf8(data.content);
         localEvents = JSON.parse(decodedContent);
+        if (!Array.isArray(localEvents)) localEvents = [];
         sortAndRenderEvents();
       } catch (err) {
         document.getElementById('adminList').innerHTML = `<p style="color:var(--pink)">Fehler beim Laden: ${err.message}</p>`;
@@ -378,8 +383,20 @@
     }
 
     function sortAndRenderEvents() {
-      // Sortieren nach Datum (Zukünftige zuerst)
-      localEvents.sort((a, b) => parseGermanDate(a.date) - parseGermanDate(b.date));
+      const now = new Date().setHours(0, 0, 0, 0);
+      
+      localEvents.sort((a, b) => {
+        const timeA = parseGermanDate(a.date);
+        const timeB = parseGermanDate(b.date);
+        const aIsFuture = timeA >= now;
+        const bIsFuture = timeB >= now;
+
+        if (aIsFuture && !bIsFuture) return -1;
+        if (!aIsFuture && bIsFuture) return 1;
+        if (aIsFuture && bIsFuture) return timeA - timeB;
+        return timeB - timeA;
+      });
+
       renderEventsList();
     }
 
@@ -389,13 +406,15 @@
 
       localEvents.forEach((ev, index) => {
         const ticketInfo = ev.tickets ? `| Ticket: <a href="${escapeHtml(ev.tickets)}" target="_blank" style="color:var(--pink)">[Link]</a>` : '';
+        const isPast = parseGermanDate(ev.date) < new Date().setHours(0,0,0,0);
+        const opacity = isPast ? '0.5' : '1';
         
         list.innerHTML += `
-          <div class="list-item" id="item-${index}">
+          <div class="list-item" id="item-${index}" style="opacity: ${opacity};">
             <div class="list-row-view" id="view-${index}">
               <div class="list-item-info">
                 <strong>${ev.date} – ${escapeHtml(ev.title)}</strong>
-                <span>Location: ${escapeHtml(ev.venue || 'TBA')} (${escapeHtml(ev.city || 'TBA')}) ${ticketInfo}</span>
+                <span>Location: ${escapeHtml(ev.venue || 'TBA')} (${escapeHtml(ev.city || 'TBA')}) ${ticketInfo} ${isPast ? ' <i>(Vergangen)</i>' : ''}</span>
               </div>
               <div class="controls">
                 <button class="btn-dark" onclick="openEditForm(${index})">Bearbeiten</button>
@@ -491,10 +510,16 @@
             'Accept': 'application/vnd.github.v3+json' 
           }
         });
+        
+        if (res.status === 404) {
+           document.getElementById('assetsGrid').innerHTML = '<p style="color:var(--muted)">Ordner /assets existiert noch nicht auf GitHub.</p>';
+           return;
+        }
+        
         if (res.status === 401) throw new Error("401 Unauthorized – Ungültiges oder abgelaufenes GitHub Token.");
         if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-        const files = await res.json();
         
+        const files = await res.json();
         const grid = document.getElementById('assetsGrid');
         grid.innerHTML = files.length ? '' : '<p style="color:var(--muted)">Keine Bilder vorhanden.</p>';
         
@@ -512,6 +537,7 @@
         });
       } catch (err) {
         console.error("Assets Fehler:", err);
+        document.getElementById('assetsGrid').innerHTML = `<p style="color:var(--pink)">Fehler beim Laden: ${err.message}</p>`;
       }
     }
 
