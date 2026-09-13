@@ -262,9 +262,9 @@
     // Mobile Zoom Protection
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-    // ── FEST HINTERLEGTE GITHUB ZUGANGSDATEN (FINE-GRAINED PAT) ──
+    // ── FEST HINTERLEGTE GITHUB ZUGANGSDATEN ──
     const ghRepo = "Enalydnb/website-dev";
-    const ghToken = "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";
+    const ghToken = "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"; // Dein echtes Fine-grained Token hier einfügen
 
     const filePathEvents = "data/events.json";
     const assetFolderPath = "assets";
@@ -295,7 +295,7 @@
       return 0;
     }
 
-    // ── GITHUB API CORE HELPERS ──
+    // ── GITHUB API CORE HELPERS (BEARER AUTH) ──
     async function getGitHubFile(path) {
       const res = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${path}`, {
         headers: { 
