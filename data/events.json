@@ -1,9 +1,30 @@
 [
   {
-    "date": "2026-08-30",
+    "date": "15.08.2026",
+    "title": "BREAKZONE Festival (B2B FLOWZ)",
+    "venue": "Odonien",
+    "city": "Cologne, DE",
+    "tickets": ""
+  },
+  {
+    "date": "22.08.2026",
+    "title": "Lass es Rollen Festival",
+    "venue": "",
+    "city": "Schaafheim, DE",
+    "tickets": ""
+  },
+  {
+    "date": "29.08.2026",
     "title": "Nibirii Festival 2026",
     "venue": "Badesee Düren",
     "city": "Düren, DE",
+    "tickets": ""
+  },
+  {
+    "date": "05.09.2026",
+    "title": "DREAMLAND Warm Up",
+    "venue": "NFF Club",
+    "city": "Bremen, DE",
     "tickets": ""
   },
   {
