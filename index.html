@@ -380,7 +380,7 @@
     <!-- ── HEADER ── -->
     <header>
       <div class="header-image-container">
-        <img src="assets/header.jpg" alt="Enaly Stage">
+        <img id="imgHeader" src="assets/header.jpg" alt="Enaly Stage">
       </div>
     </header>
 
@@ -389,7 +389,7 @@
       <div class="section-title">About</div>
       <div class="about-grid">
         <div class="about-left">
-          <img src="assets/about.jpg" alt="Enaly Portrait" class="about-portrait">
+          <img id="imgAbout" src="assets/about.jpg" alt="Enaly Portrait" class="about-portrait">
         </div>
         <div class="about-right" id="aboutTextContainer">
           <p>Enaly is a drum and bass DJ known for her dark and heavy sound, shaped by her roots in rock and metal. Blending powerful, hard-hitting elements with melodic passages, she creates emotionally driven sets that take listeners on a dynamic musical journey.</p>
@@ -447,7 +447,7 @@
         <div class="booking-left">
           <h3>WANT TO MAKE SOME NOISE TOGETHER?</h3>
           <p>Send your booking inquiry through the form or email directly to <a href="mailto:info@enaly.de">info@enaly.de</a>.</p>
-          <img src="assets/working.jpg" alt="Enaly Working DJ Set" class="booking-working-img">
+          <img id="imgWorking" src="assets/working.jpg" alt="Enaly Working DJ Set" class="booking-working-img">
         </div>
         
         <form id="bookingForm" action="https://formspree.io/f/mbgjvgen" method="POST">
@@ -531,12 +531,17 @@
     // Mobile Zoom Protection
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-    // Auto Content-Loader
+    // Auto Content-Loader (inkl. dynamischem Bildaustausch)
     async function loadContent() {
       try {
         const res = await fetch('data/content.json');
         if (!res.ok) return;
         const content = await res.json();
+
+        // Bilder austauschen, falls in content.json vorhanden
+        if (content.imgHeader) document.getElementById('imgHeader').src = content.imgHeader;
+        if (content.imgAbout) document.getElementById('imgAbout').src = content.imgAbout;
+        if (content.imgWorking) document.getElementById('imgWorking').src = content.imgWorking;
 
         if (content.about && content.about.trim() !== "") {
           const paragraphs = content.about.split('\n').filter(p => p.trim() !== "");
