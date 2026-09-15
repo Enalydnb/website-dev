@@ -217,14 +217,16 @@
     }
     .event-row {
       display: grid;
-      grid-template-columns: 140px 1fr 200px 120px;
+      grid-template-columns: 140px 1fr auto 120px;
+      gap: 1.5rem;
       align-items: center;
       padding: 1.1rem 0;
       border-bottom: 1px solid rgba(255,255,255,0.04);
     }
     .event-row-past {
       display: grid;
-      grid-template-columns: 140px 1fr 200px;
+      grid-template-columns: 140px 1fr 1fr;
+      gap: 1.5rem;
       align-items: center;
       padding: 1.1rem 0;
       border-bottom: 1px solid rgba(255,255,255,0.04);
@@ -232,7 +234,7 @@
     .event-row:last-child, .event-row-past:last-child { border-bottom: none; }
     .event-date { font-family: 'League Gothic', sans-serif; font-weight: 400; font-size: 1.6rem; color: var(--pink); }
     .event-title { font-size: 1.1rem; }
-    .event-loc { color: var(--muted); font-size: 0.95rem; }
+    .event-loc { color: var(--muted); font-size: 0.95rem; text-align: right; }
     .event-ticket-link {
       text-align: right;
       font-family: 'League Gothic', sans-serif;
@@ -355,6 +357,7 @@
       .about-right { order: 1; }
       .booking-grid { grid-template-columns: 1fr; gap: 2rem; }
       .event-row, .event-row-past { grid-template-columns: 1fr; gap: 0.3rem; }
+      .event-loc { text-align: left; }
       .event-ticket-link { text-align: left; }
       .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
       .ref-container { flex-direction: column; gap: 0.4rem; font-size: 2.2rem; }
@@ -531,14 +534,13 @@
     // Mobile Zoom Protection
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-    // Auto Content-Loader (inkl. dynamischem Bildaustausch)
+    // Auto Content-Loader
     async function loadContent() {
       try {
         const res = await fetch('data/content.json');
         if (!res.ok) return;
         const content = await res.json();
 
-        // Bilder austauschen, falls in content.json vorhanden
         if (content.imgHeader) document.getElementById('imgHeader').src = content.imgHeader;
         if (content.imgAbout) document.getElementById('imgAbout').src = content.imgAbout;
         if (content.imgWorking) document.getElementById('imgWorking').src = content.imgWorking;
@@ -583,7 +585,7 @@
 
     loadContent();
 
-    // Auto Event-Loader (Zeigt exakt die 5 neusten vergangenen Dates)
+    // Auto Event-Loader
     async function loadEvents() {
       try {
         const res = await fetch('data/events.json');
