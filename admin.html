@@ -340,16 +340,11 @@
     const filePathContent = "data/content.json";
     const assetFolderPath = "assets";
 
-    // Standardinhalte als Fallback für leeres content.json
-    const defaultAbout = "Enaly is a drum and bass DJ known for her dark and heavy sound, shaped by her roots in rock and metal. Blending powerful, hard-hitting elements with melodic passages, she creates emotionally driven sets that take listeners on a dynamic musical journey.\n\nHaving shared stages with artists such as Andy C, Culture Shock, Dimension and Wilkinson, and performed at venues like Bootshaus and Odonien as well as festivals including Nibirii and Nature One, Enaly continues to build strong momentum within the scene.\n\nAwarded Best Newcomer at the Drum and Bass Awards Germany 23/24, she is rapidly establishing herself as a rising force in drum and bass.";
-    const defaultSharedStage = "ANDY C, BLACK SUN EMPIRE, CULTURE SHOCK, DELTA HEAVY, DIMENSION, FRICTION, K MOTIONZ, KANINE, MEFJUS, PENDULUM, WILKINSON, ZOMBIE CATS";
-    const defaultSelectedShows = "NIBIRII FESTIVAL, NATURE ONE, BOOTSHAUS, ODONIEN, PROTON";
-
     let localEvents = [];
     let localContent = { 
-      about: defaultAbout, 
-      sharedStage: defaultSharedStage, 
-      selectedShows: defaultSelectedShows,
+      about: "", 
+      sharedStage: "", 
+      selectedShows: "",
       imgHeader: "assets/header.jpg",
       imgAbout: "assets/about.jpg",
       imgWorking: "assets/working.jpg"
@@ -406,7 +401,7 @@
     }
 
     // ── API HELPERS ÜBER CLOUDFLARE WORKER PROXY ──
-    async function getGitHubFile(path, defaultFallback = "[]") {
+    async function getGitHubFile(path, defaultFallback = "{}") {
       const safePath = cleanPath(path);
       const res = await fetch(`${proxyApiUrl}/${safePath}`);
       
@@ -635,27 +630,15 @@
     // ── CONTENT / TEXTE LOGIK ──
     async function loadContentFromGitHub() {
       try {
-        const defaultJSON = JSON.stringify({ 
-          about: defaultAbout, 
-          sharedStage: defaultSharedStage, 
-          selectedShows: defaultSelectedShows,
-          imgHeader: "assets/header.jpg",
-          imgAbout: "assets/about.jpg",
-          imgWorking: "assets/working.jpg"
-        });
-        
-        const data = await getGitHubFile(filePathContent, defaultJSON);
+        const data = await getGitHubFile(filePathContent, "{}");
         const decodedContent = b64_to_utf8(data.content);
         localContent = JSON.parse(decodedContent);
         
-        document.getElementById('textContentAbout').value = localContent.about || defaultAbout;
-        document.getElementById('textContentSharedStage').value = localContent.sharedStage || defaultSharedStage;
-        document.getElementById('textContentSelectedShows').value = localContent.selectedShows || defaultSelectedShows;
+        document.getElementById('textContentAbout').value = localContent.about || "";
+        document.getElementById('textContentSharedStage').value = localContent.sharedStage || "";
+        document.getElementById('textContentSelectedShows').value = localContent.selectedShows || "";
       } catch (err) {
         console.error("Content Fehler beim Laden:", err);
-        document.getElementById('textContentAbout').value = defaultAbout;
-        document.getElementById('textContentSharedStage').value = defaultSharedStage;
-        document.getElementById('textContentSelectedShows').value = defaultSelectedShows;
       }
     }
 

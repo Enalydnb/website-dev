@@ -255,7 +255,7 @@
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
-      gap: 0.6rem 1rem;
+      gap: 0.6rem 2rem;
       font-family: 'League Gothic', sans-serif;
       font-weight: 400;
       font-size: clamp(2.2rem, 4.5vw, 3.8rem);
@@ -264,8 +264,7 @@
       color: var(--text);
       text-transform: uppercase;
     }
-    .ref-item { white-space: nowrap; display: inline-flex; align-items: center; gap: 1rem; }
-    .ref-item .dot { color: var(--pink); font-size: 0.75em; }
+    .ref-item { white-space: nowrap; }
 
     /* ── BOOKING & CONTACT ── */
     .booking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
@@ -362,7 +361,6 @@
       .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
       .ref-container { flex-direction: column; gap: 0.4rem; font-size: 2.2rem; }
       .ref-item { justify-content: center; }
-      .ref-item .dot { display: none; }
     }
   </style>
 </head>
@@ -394,12 +392,7 @@
         <div class="about-left">
           <img id="imgAbout" src="assets/about.jpg" alt="Enaly Portrait" class="about-portrait">
         </div>
-        <div class="about-right" id="aboutTextContainer">
-          <p>Enaly is a drum and bass DJ known for her dark and heavy sound, shaped by her roots in rock and metal. Blending powerful, hard-hitting elements with melodic passages, she creates emotionally driven sets that take listeners on a dynamic musical journey.</p>
-          <p>Having shared stages with artists such as Andy C, Culture Shock, Dimension and Wilkinson, and performed at venues like Bootshaus and Odonien as well as festivals including Nibirii and Nature One, Enaly continues to build strong momentum within the scene.</p>
-          <p>Awarded Best Newcomer at the Drum and Bass Awards Germany 23/24, she is rapidly establishing herself as a rising force in drum and bass.</p>
-          <div class="quote-box">"I like drum and bass more than people"</div>
-        </div>
+        <div class="about-right" id="aboutTextContainer"></div>
       </div>
     </section>
 
@@ -417,29 +410,10 @@
     <section class="section-card">
       <div class="ref-wrapper">
         <div class="ref-label">SHARED THE STAGE WITH</div>
-        <div class="ref-container" id="sharedStageContainer">
-          <div class="ref-item">ANDY C <span class="dot">■</span></div>
-          <div class="ref-item">BLACK SUN EMPIRE <span class="dot">■</span></div>
-          <div class="ref-item">CULTURE SHOCK <span class="dot">■</span></div>
-          <div class="ref-item">DELTA HEAVY <span class="dot">■</span></div>
-          <div class="ref-item">DIMENSION <span class="dot">■</span></div>
-          <div class="ref-item">FRICTION <span class="dot">■</span></div>
-          <div class="ref-item">K MOTIONZ <span class="dot">■</span></div>
-          <div class="ref-item">KANINE <span class="dot">■</span></div>
-          <div class="ref-item">MEFJUS <span class="dot">■</span></div>
-          <div class="ref-item">PENDULUM <span class="dot">■</span></div>
-          <div class="ref-item">WILKINSON <span class="dot">■</span></div>
-          <div class="ref-item">ZOMBIE CATS</div>
-        </div>
+        <div class="ref-container" id="sharedStageContainer"></div>
 
         <div class="ref-label" style="margin-top: 3rem;">SELECTED SHOWS</div>
-        <div class="ref-container" id="selectedShowsContainer">
-          <div class="ref-item">NIBIRII FESTIVAL <span class="dot">■</span></div>
-          <div class="ref-item">NATURE ONE <span class="dot">■</span></div>
-          <div class="ref-item">BOOTSHAUS <span class="dot">■</span></div>
-          <div class="ref-item">ODONIEN <span class="dot">■</span></div>
-          <div class="ref-item">PROTON</div>
-        </div>
+        <div class="ref-container" id="selectedShowsContainer"></div>
       </div>
     </section>
 
@@ -491,7 +465,7 @@
       <div class="footer-socials">
         <!-- INSTAGRAM -->
         <a href="https://www.instagram.com/enaly" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Instagram">
-          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.067 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
         </a>
 
         <!-- SOUNDCLOUD -->
@@ -557,10 +531,7 @@
           const items = content.sharedStage.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== "");
           const container = document.getElementById('sharedStageContainer');
           if (items.length > 0) {
-            container.innerHTML = items.map((item, idx) => {
-              const showDot = idx < items.length - 1;
-              return `<div class="ref-item">${escapeHtml(item.toUpperCase())} ${showDot ? '<span class="dot">■</span>' : ''}</div>`;
-            }).join('');
+            container.innerHTML = items.map(item => `<div class="ref-item">${escapeHtml(item.toUpperCase())}</div>`).join('');
           }
         }
 
@@ -568,10 +539,7 @@
           const items = content.selectedShows.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== "");
           const container = document.getElementById('selectedShowsContainer');
           if (items.length > 0) {
-            container.innerHTML = items.map((item, idx) => {
-              const showDot = idx < items.length - 1;
-              return `<div class="ref-item">${escapeHtml(item.toUpperCase())} ${showDot ? '<span class="dot">■</span>' : ''}</div>`;
-            }).join('');
+            container.innerHTML = items.map(item => `<div class="ref-item">${escapeHtml(item.toUpperCase())}</div>`).join('');
           }
         }
       } catch (err) {
