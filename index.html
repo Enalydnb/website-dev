@@ -14,14 +14,14 @@
   <meta property="og:title" content="Enaly · Drum & Bass DJ" />
   <meta property="og:description" content="Official Website of Enaly. Dark & Heavy Drum & Bass DJ." />
   <meta property="og:url" content="https://enaly.de" />
-  <meta property="og:image" content="https://enaly.de/assets/seo.jpg" />
+  <meta property="og:image" content="https://enaly.de/assets/about.jpg" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Enaly" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Enaly · Drum & Bass DJ">
   <meta name="twitter:description" content="Official Website of Enaly. Dark & Heavy Drum & Bass DJ.">
-  <meta name="twitter:image" content="https://enaly.de/assets/seo.jpg">
+  <meta name="twitter:image" content="https://enaly.de/assets/about.jpg">
   
   <!-- ── STRUCTURED DATA (SEO SCHEMAS) ── -->
   <script type="application/ld+json">
@@ -30,7 +30,7 @@
     "@type": "MusicGroup",
     "name": "Enaly",
     "url": "https://enaly.de",
-    "image": "https://enaly.de/assets/seo.jpg",
+    "image": "https://enaly.de/assets/about.jpg",
     "genre": ["Drum & Bass", "Neurofunk", "Heavy D&B"],
     "sameAs": [
       "https://www.instagram.com/enaly",
@@ -205,7 +205,7 @@
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    /* ── EVENTS ── */
+    /* ── EVENTS (EXAKT BÜNDIG RANDEINGESTELLT) ── */
     .sub-heading {
       font-family: 'League Gothic', sans-serif;
       font-weight: 400;
@@ -217,7 +217,7 @@
     }
     .event-row {
       display: grid;
-      grid-template-columns: 140px 1fr auto 120px;
+      grid-template-columns: 140px 1fr auto auto;
       gap: 1.5rem;
       align-items: center;
       padding: 1.1rem 0;
@@ -225,7 +225,7 @@
     }
     .event-row-past {
       display: grid;
-      grid-template-columns: 140px 1fr 1fr;
+      grid-template-columns: 140px 1fr auto;
       gap: 1.5rem;
       align-items: center;
       padding: 1.1rem 0;
@@ -235,6 +235,7 @@
     .event-date { font-family: 'League Gothic', sans-serif; font-weight: 400; font-size: 1.6rem; color: var(--pink); }
     .event-title { font-size: 1.1rem; }
     .event-loc { color: var(--muted); font-size: 0.95rem; text-align: right; }
+    .event-ticket-wrapper { display: flex; justify-content: flex-end; }
     .event-ticket-link {
       text-align: right;
       font-family: 'League Gothic', sans-serif;
@@ -547,11 +548,9 @@
       if (!rawText || rawText.trim() === "") return;
       const container = document.getElementById(containerId);
       
-      // Trennen nach Zeilenumbrüchen (\n)
       const lines = rawText.split('\n').map(l => l.trim()).filter(l => l !== "");
       
       let html = lines.map(line => {
-        // Trennen nach Kommas innerhalb einer Zeile
         const items = line.split(',').map(i => i.trim()).filter(i => i !== "");
         const itemsHtml = items.map((item, idx) => {
           const showDot = idx < items.length - 1;
@@ -605,7 +604,7 @@
               <div class="event-date">${escapeHtml(item.date)}</div>
               <div class="event-title">${escapeHtml(item.title)}</div>
               <div class="event-loc">${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</div>
-              <div>${item.tickets ? `<a href="${escapeHtml(item.tickets)}" target="_blank" class="event-ticket-link">TICKETS</a>` : ''}</div>
+              <div class="event-ticket-wrapper">${item.tickets ? `<a href="${escapeHtml(item.tickets)}" target="_blank" class="event-ticket-link">TICKETS</a>` : ''}</div>
             </div>
           `;
         });
