@@ -222,7 +222,14 @@
       padding: 1.1rem 0;
       border-bottom: 1px solid rgba(255,255,255,0.04);
     }
-    .event-row:last-child { border-bottom: none; }
+    .event-row-past {
+      display: grid;
+      grid-template-columns: 140px 1fr 200px;
+      align-items: center;
+      padding: 1.1rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .event-row:last-child, .event-row-past:last-child { border-bottom: none; }
     .event-date { font-family: 'League Gothic', sans-serif; font-weight: 400; font-size: 1.6rem; color: var(--pink); }
     .event-title { font-size: 1.1rem; }
     .event-loc { color: var(--muted); font-size: 0.95rem; }
@@ -347,7 +354,7 @@
       .about-left { order: 2; width: 100%; }
       .about-right { order: 1; }
       .booking-grid { grid-template-columns: 1fr; gap: 2rem; }
-      .event-row { grid-template-columns: 1fr; gap: 0.3rem; }
+      .event-row, .event-row-past { grid-template-columns: 1fr; gap: 0.3rem; }
       .event-ticket-link { text-align: left; }
       .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
       .ref-container { flex-direction: column; gap: 0.4rem; font-size: 2.2rem; }
@@ -615,11 +622,10 @@
         pastContainer.innerHTML = recentPastList.length ? '' : `<div style="color: var(--muted); font-size: 0.95rem; padding: 1rem 0;">No recent past shows.</div>`;
         recentPastList.forEach(item => {
           pastContainer.innerHTML += `
-            <div class="event-row" style="opacity: 0.45;">
+            <div class="event-row-past" style="opacity: 0.45;">
               <div class="event-date" style="color: var(--muted);">${escapeHtml(item.date)}</div>
               <div class="event-title">${escapeHtml(item.title)}</div>
               <div class="event-loc">${escapeHtml(item.venue)} · ${escapeHtml(item.city)}</div>
-              <div></div>
             </div>
           `;
         });
