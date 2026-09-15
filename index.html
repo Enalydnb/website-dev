@@ -252,10 +252,16 @@
     .ref-label { font-size: 0.75rem; letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase; margin-bottom: 1.75rem; }
     .ref-container {
       display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .ref-row {
+      display: flex;
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
-      gap: 0.6rem 2rem;
+      gap: 0.6rem 1rem;
       font-family: 'League Gothic', sans-serif;
       font-weight: 400;
       font-size: clamp(2.2rem, 4.5vw, 3.8rem);
@@ -264,7 +270,8 @@
       color: var(--text);
       text-transform: uppercase;
     }
-    .ref-item { white-space: nowrap; }
+    .ref-item { white-space: nowrap; display: inline-flex; align-items: center; gap: 1rem; }
+    .ref-item .dot { color: var(--pink); font-size: 0.75em; }
 
     /* ── BOOKING & CONTACT ── */
     .booking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
@@ -359,8 +366,9 @@
       .event-loc { text-align: left; }
       .event-ticket-link { text-align: left; }
       .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
-      .ref-container { flex-direction: column; gap: 0.4rem; font-size: 2.2rem; }
+      .ref-row { flex-direction: column; gap: 0.4rem; font-size: 2.2rem; }
       .ref-item { justify-content: center; }
+      .ref-item .dot { display: none; }
     }
   </style>
 </head>
@@ -527,24 +535,32 @@
           container.innerHTML = html;
         }
 
-        if (content.sharedStage && content.sharedStage.trim() !== "") {
-          const items = content.sharedStage.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== "");
-          const container = document.getElementById('sharedStageContainer');
-          if (items.length > 0) {
-            container.innerHTML = items.map(item => `<div class="ref-item">${escapeHtml(item.toUpperCase())}</div>`).join('');
-          }
-        }
+        renderRefList(content.sharedStage, 'sharedStageContainer');
+        renderRefList(content.selectedShows, 'selectedShowsContainer');
 
-        if (content.selectedShows && content.selectedShows.trim() !== "") {
-          const items = content.selectedShows.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== "");
-          const container = document.getElementById('selectedShowsContainer');
-          if (items.length > 0) {
-            container.innerHTML = items.map(item => `<div class="ref-item">${escapeHtml(item.toUpperCase())}</div>`).join('');
-          }
-        }
       } catch (err) {
         console.error('Error loading content:', err);
       }
+    }
+
+    function renderRefList(rawText, containerId) {
+      if (!rawText || rawText.trim() === "") return;
+      const container = document.getElementById(containerId);
+      
+      // Trennen nach Zeilenumbrüchen (\n)
+      const lines = rawText.split('\n').map(l => l.trim()).filter(l => l !== "");
+      
+      let html = lines.map(line => {
+        // Trennen nach Kommas innerhalb einer Zeile
+        const items = line.split(',').map(i => i.trim()).filter(i => i !== "");
+        const itemsHtml = items.map((item, idx) => {
+          const showDot = idx < items.length - 1;
+          return `<div class="ref-item">${escapeHtml(item.toUpperCase())} ${showDot ? '<span class="dot">■</span>' : ''}</div>`;
+        }).join('');
+        return `<div class="ref-row">${itemsHtml}</div>`;
+      }).join('');
+
+      container.innerHTML = html;
     }
 
     function escapeHtml(text) {
