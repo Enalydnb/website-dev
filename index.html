@@ -269,14 +269,20 @@
       gap: 0.6rem 1rem;
       font-family: 'League Gothic', sans-serif;
       font-weight: 400;
-      font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+      font-size: clamp(2rem, 4.2vw, 3.8rem);
       line-height: 1.1;
       letter-spacing: 0.04em;
       color: var(--text);
       text-transform: uppercase;
     }
-    .ref-item { white-space: nowrap; display: inline-flex; align-items: center; gap: 1rem; }
-    .ref-item .dot { color: var(--pink); font-size: 0.75em; }
+    .ref-item { 
+      white-space: nowrap; 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 1rem; 
+    }
+    .ref-item .dot { color: var(--pink); font-size: 0.65em; }
+    .ref-item:last-child .dot { display: none; }
 
     /* ── BOOKING & CONTACT ── */
     .booking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
@@ -372,15 +378,15 @@
       .event-ticket-link { text-align: left; }
       .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
 
-      /* Mobile References: behält das Desktop-Layout mit Punkten bei */
+      /* Mobile References: Fließender Umbruch wie auf dem Screenshot */
       .ref-row { 
-        gap: 0.4rem 0.8rem; 
+        gap: 0.4rem 0.75rem; 
       }
       .ref-item {
-        gap: 0.8rem;
+        gap: 0.75rem;
       }
       .ref-item .dot { 
-        font-size: 0.6em; 
+        font-size: 0.55em; 
       }
     }
   </style>
@@ -562,18 +568,13 @@
       if (!rawText || rawText.trim() === "") return;
       const container = document.getElementById(containerId);
       
-      const lines = rawText.split('\n').map(l => l.trim()).filter(l => l !== "");
+      const items = rawText.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== "");
       
-      let html = lines.map(line => {
-        const items = line.split(',').map(i => i.trim()).filter(i => i !== "");
-        const itemsHtml = items.map((item, idx) => {
-          const showDot = idx < items.length - 1;
-          return `<div class="ref-item">${escapeHtml(item.toUpperCase())} ${showDot ? '<span class="dot">■</span>' : ''}</div>`;
-        }).join('');
-        return `<div class="ref-row">${itemsHtml}</div>`;
+      const html = items.map(item => {
+        return `<div class="ref-item">${escapeHtml(item.toUpperCase())}<span class="dot">■</span></div>`;
       }).join('');
 
-      container.innerHTML = html;
+      container.innerHTML = `<div class="ref-row">${html}</div>`;
     }
 
     function escapeHtml(text) {
