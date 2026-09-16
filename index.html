@@ -371,9 +371,17 @@
       .event-loc { text-align: left; }
       .event-ticket-link { text-align: left; }
       .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
-      .ref-row { flex-direction: column; gap: 0.4rem; font-size: 2.2rem; }
-      .ref-item { justify-content: center; }
-      .ref-item .dot { display: none; }
+
+      /* Mobile References: behält das Desktop-Layout mit Punkten bei */
+      .ref-row { 
+        gap: 0.4rem 0.8rem; 
+      }
+      .ref-item {
+        gap: 0.8rem;
+      }
+      .ref-item .dot { 
+        font-size: 0.6em; 
+      }
     }
   </style>
 </head>
@@ -657,7 +665,7 @@
       if (!turnstileToken) {
         status.style.display = 'block';
         status.style.color = 'var(--pink)';
-        status.innerText = 'Please verify the Cloudflare CAPTCHA.';
+        status.innerText = 'Bitte bestätige das Cloudflare Captcha.';
         return;
       }
 
@@ -679,7 +687,7 @@
         if (response.ok) {
           status.style.display = 'block';
           status.style.color = 'var(--green)';
-          status.innerText = 'Thank you very much! Your request was sent successfully.';
+          status.innerText = 'Vielen Dank! Deine Anfrage wurde erfolgreich gesendet.';
           form.reset();
           if (window.turnstile) turnstile.reset();
         } else {
