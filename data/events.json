@@ -7,13 +7,6 @@
     "tickets": ""
   },
   {
-    "date": "22.08.2026",
-    "title": "Lass es Rollen Festival",
-    "venue": "",
-    "city": "Schaafheim, DE",
-    "tickets": ""
-  },
-  {
     "date": "29.08.2026",
     "title": "Nibirii Festival 2026",
     "venue": "Badesee Düren",
@@ -39,6 +32,13 @@
     "title": "Beats x Bass x Colonge pres. #MITTWOCHENENDE",
     "venue": "Odonien",
     "city": "Colonge, DE",
+    "tickets": ""
+  },
+  {
+    "date": "16.10.2026",
+    "title": "Forcefield",
+    "venue": "Mauerpfeiffer",
+    "city": "Saarbrücken (Lux)",
     "tickets": ""
   },
   {
