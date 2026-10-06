@@ -1,12 +1,5 @@
 [
   {
-    "date": "01.08.2026",
-    "title": "Nature One Festival",
-    "venue": "Raketenbasis Pydna",
-    "city": "Kastellaun, DE",
-    "tickets": ""
-  },
-  {
     "date": "15.08.2026",
     "title": "BREAKZONE Festival (B2B FLOWZ)",
     "venue": "Odonien",
@@ -46,6 +39,13 @@
     "title": "Beats x Bass x Colonge pres. #MITTWOCHENENDE",
     "venue": "Odonien",
     "city": "Colonge, DE",
+    "tickets": ""
+  },
+  {
+    "date": "16.10.2026",
+    "title": "Forcefield",
+    "venue": "Mauerpfeiffer",
+    "city": "Saarbrücken 🇩🇪",
     "tickets": ""
   },
   {
