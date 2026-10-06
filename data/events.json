@@ -1,13 +1,6 @@
 [
   {
     "date": "01.08.2026",
-    "title": "PLAY! Open Air",
-    "venue": "Bootshaus",
-    "city": "Cologne, DE",
-    "tickets": ""
-  },
-  {
-    "date": "01.08.2026",
     "title": "Nature One Festival",
     "venue": "Raketenbasis Pydna",
     "city": "Kastellaun, DE",
@@ -53,6 +46,13 @@
     "title": "Beats x Bass x Colonge pres. #MITTWOCHENENDE",
     "venue": "Odonien",
     "city": "Colonge, DE",
+    "tickets": ""
+  },
+  {
+    "date": "16.10.2026",
+    "title": "Forcefield",
+    "venue": "Mauerpfeiffer",
+    "city": "Saarbrücken 🇱🇺",
     "tickets": ""
   },
   {
