@@ -89,6 +89,7 @@
       inset: 0;
       z-index: -2;
     }
+    .hero-media picture { display: block; width: 100%; height: 100%; }
     .hero-media img {
       width: 100%;
       height: 100%;
@@ -649,9 +650,11 @@
         padding-top: calc(var(--nav-h) + 0.75rem);
       }
       .hero-media { position: relative; inset: auto; z-index: 0; }
+      .hero-media picture { display: block; }
       .hero-media img {
         height: auto;
-        object-fit: initial;
+        max-height: 78svh;
+        object-fit: cover;
         transform: none;
         animation: none;
       }
@@ -713,7 +716,11 @@
   <!-- ==================== HERO ==================== -->
   <header class="hero">
     <div class="hero-media">
-      <img id="imgHeader" src="assets/header.jpg" alt="Enaly Stage" fetchpriority="high">
+      <picture>
+        <!-- Mobile header (admin: Images / Layout → Header Banner Image · Mobile); breakpoint matches the mobile hero layout -->
+        <source id="imgHeaderMobile" media="(max-width: 600px)" srcset="assets/header.jpg">
+        <img id="imgHeader" src="assets/header.jpg" alt="Enaly Stage" fetchpriority="high">
+      </picture>
     </div>
     <div class="container hero-inner">
       <div class="hero-bottom">
@@ -952,6 +959,8 @@
         const content = await res.json();
 
         if (content.imgHeader) document.getElementById('imgHeader').src = content.imgHeader;
+        // Separate mobile header if set, otherwise phones use the desktop image
+        document.getElementById('imgHeaderMobile').srcset = content.imgHeaderMobile || content.imgHeader || 'assets/header.jpg';
         if (content.imgAbout) document.getElementById('imgAbout').src = content.imgAbout;
         if (content.imgWorking) document.getElementById('imgWorking').src = content.imgWorking;
 
