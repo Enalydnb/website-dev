@@ -51,7 +51,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/enaly.css">
+  <link rel="stylesheet" href="css/enaly.css?v=20261104c">
 
   <style>
     /* ==================== HOME · page layout ==================== */
@@ -470,7 +470,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.1rem 0;
+      gap: 0.1em 0.55em;
       max-width: 1000px;
       margin: 0 auto;
       font-family: var(--font-display);
@@ -481,13 +481,15 @@
       color: var(--text-primary);
     }
     .ref-list li { white-space: nowrap; transition: color var(--transition-fast); }
+    .ref-list li { display: inline-flex; align-items: center; }
     .ref-list li:hover { color: var(--pink); }
     .ref-list li:not(:last-child)::after {
-      content: "/";
-      margin: 0 0.45em;
+      content: "■";
+      margin-left: 1.2em; /* = 0.55em of the name size, same as the gap after it */
+      font-size: 0.45em;
       color: var(--pink);
-      opacity: 0.7;
     }
+
 
     /* ---------- BOOKING ---------- */
     .booking-panel {
@@ -624,7 +626,29 @@
       .about-text { order: -1; }
     }
     @media (max-width: 600px) {
-      .hero { min-height: 92svh; }
+      /* Mobile: header image in its natural aspect ratio (nothing cropped), logo + buttons below */
+      .hero {
+        display: block;
+        min-height: 0;
+        padding-top: calc(var(--nav-h) + 0.75rem);
+      }
+      .hero-media { position: relative; inset: auto; z-index: 0; }
+      .hero-media img {
+        height: auto;
+        object-fit: initial;
+        transform: none;
+        animation: none;
+      }
+      .hero::after { display: none; }
+      .hero-media::after {
+        content: "";
+        position: absolute;
+        left: 0; right: 0; bottom: 0;
+        height: 35%;
+        background: linear-gradient(180deg, transparent, #000);
+      }
+      .hero-inner { position: relative; z-index: 1; margin-top: -2.5rem; padding-top: 0; }
+      .hero-logo img { width: min(78vw, 360px); }
       .hero-actions { width: 100%; }
       .hero-actions .btn { flex: 1 1 auto; }
       .event-card { grid-template-columns: 64px minmax(0, 1fr); gap: 0.9rem; }
@@ -865,7 +889,7 @@
         <div class="footer-bottom">
           <p>© 2026 Enaly. All rights reserved.</p>
           <ul class="footer-legal">
-            <li><button type="button" data-cookie-settings>Cookie Settings</button></li>
+            <li><a href="#" role="button" data-cookie-settings>Cookie Settings</a></li>
             <li><a href="imprint">Imprint</a></li>
             <li><a href="privacy-policies">Privacy Policies</a></li>
           </ul>
@@ -876,9 +900,9 @@
   </footer>
 
   <!-- ==================== SCRIPTS ==================== -->
-  <script src="js/site.js"></script>
-  <script src="js/cookie-banner.js"></script>
-  <script src="js/booking-form.js"></script>
+  <script src="js/site.js?v=20261104c"></script>
+  <script src="js/cookie-banner.js?v=20261104c"></script>
+  <script src="js/booking-form.js?v=20261104c"></script>
 
   <script>
     // ---------- Helpers ----------
