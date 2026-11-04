@@ -5,7 +5,7 @@
   "imgHeader": "assets/header.jpg",
   "imgAbout": "assets/about.jpg",
   "imgWorking": "assets/working.jpg",
-  "whatsNewActive": true,
+  "whatsNewActive": false,
   "whatsNewTitle": "What's New?",
   "whatsNewHeadline": "bloß nicht klicken!!!!",
   "whatsNewLink": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
