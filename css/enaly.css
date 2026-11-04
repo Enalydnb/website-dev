@@ -201,18 +201,7 @@ button { font: inherit; color: inherit; }
   transition: color var(--transition-fast), background var(--transition-fast);
 }
 .nav-links a:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
-.nav-links a.active { color: var(--text-primary); }
-.nav-links a.active::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 0.2rem;
-  width: 14px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--pink);
-  transform: translateX(-50%);
-}
+.nav-links a.active { color: var(--pink); }
 
 .nav-right { display: flex; align-items: center; gap: 0.5rem; }
 
