@@ -309,6 +309,59 @@
     .badge-soldout { color: var(--pink); border: 1px solid var(--pink-line); background: var(--pink-soft); }
     .badge-door { color: var(--text-muted); border: 1px solid var(--glass-border); }
 
+    /* Legal texts editor */
+    .segmented {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .seg-btn {
+      padding: 0.6rem 1.1rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--glass-border);
+      background: rgba(0,0,0,0.45);
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    }
+    .seg-btn:hover { color: var(--text-primary); }
+    .seg-btn.active { background: var(--pink-soft); border-color: var(--pink-line); color: var(--text-primary); }
+    .view-page {
+      margin-left: auto;
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      font-size: 0.85rem; color: var(--text-secondary); text-decoration: none; cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+    .view-page svg { width: 16px; height: 16px; }
+    .view-page:hover { color: var(--pink); }
+    .format-help {
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: var(--radius-inner);
+      border: 1px dashed var(--glass-border);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+    .format-help strong { color: var(--text-muted); }
+    .format-help code {
+      font-size: 0.8rem; padding: 0.05rem 0.35rem; border-radius: 5px;
+      background: var(--bg-surface); color: var(--text-primary);
+    }
+    .legal-section { padding: 1rem; margin-bottom: 0.75rem; }
+    .legal-section-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+    .legal-num {
+      font-family: var(--font-display); font-size: 1.5rem; color: var(--pink);
+      min-width: 1.6rem; text-align: center;
+    }
+    .legal-section-head input { flex: 1; font-weight: 600; }
+    .legal-section textarea { min-height: 120px; }
+
     /* Image assignment */
     .image-select-row {
       display: grid;
@@ -483,6 +536,10 @@
         <button class="nav-tab" id="tabBtnAssets" onclick="switchTab('assets')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
           Assets Upload
+        </button>
+        <button class="nav-tab" id="tabBtnLegal" onclick="switchTab('legal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>
+          Legal Texts
         </button>
       </nav>
 
@@ -698,6 +755,42 @@
         </div>
       </div>
 
+      <!-- ── TAB 5: LEGAL TEXTS (data/imprint.json, data/privacy.json) ── -->
+      <div id="tabLegal" style="display:none;">
+        <div class="page-head">
+          <div>
+            <h2>Legal Texts</h2>
+            <p>Edit Imprint and Privacy Policies. Each section has a title and a text.</p>
+          </div>
+        </div>
+
+        <div class="segmented" role="tablist" aria-label="Document">
+          <button type="button" class="seg-btn active" id="legalSegImprint" onclick="switchLegalDoc('imprint')">Imprint</button>
+          <button type="button" class="seg-btn" id="legalSegPrivacy" onclick="switchLegalDoc('privacy')">Privacy Policies</button>
+          <a class="view-page" id="legalViewLink" href="imprint" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+            View page
+          </a>
+        </div>
+
+        <div class="format-help">
+          <strong>Formatting:</strong>
+          empty line = new paragraph · <code>**text**</code> = bold · line starting with <code>- </code> = bullet point · e-mail addresses and https:// links become clickable automatically
+        </div>
+
+        <div id="legalEditor"><p class="loading">Loading texts...</p></div>
+
+        <button class="btn btn-ghost btn-sm" style="margin-top:0.5rem;" onclick="addLegalSection()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Add Section
+        </button>
+
+        <button class="btn btn-primary btn-save-sticky" id="btnSaveLegal" onclick="saveLegalToGitHub()" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          <span>Save Imprint</span>
+        </button>
+      </div>
+
     </main>
   </div>
 
@@ -745,6 +838,7 @@
       loadContentFromGitHub();
       loadAssetsFromGitHub();
       setupDropzone();
+      loadLegalFromGitHub();
     });
 
     // ── TOASTS (replace blocking alerts) ──
@@ -768,7 +862,7 @@
     }
 
     function switchTab(tab) {
-      const tabs = ['events', 'content', 'images', 'assets'];
+      const tabs = ['events', 'content', 'images', 'assets', 'legal'];
       tabs.forEach(t => {
         const tabEl = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
         const tabBtn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -779,6 +873,7 @@
       document.getElementById('btnSaveEvents').style.display = (tab === 'events') ? 'flex' : 'none';
       document.getElementById('btnSaveContent').style.display = (tab === 'content') ? 'flex' : 'none';
       document.getElementById('btnSaveImages').style.display = (tab === 'images') ? 'flex' : 'none';
+      document.getElementById('btnSaveLegal').style.display = (tab === 'legal') ? 'flex' : 'none';
 
       if (tab === 'assets' || tab === 'images') loadAssetsFromGitHub();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1144,6 +1239,119 @@
     function syncWhatsNewState() {
       const on = document.getElementById('whatsNewActive').checked;
       document.getElementById('whatsNewFields').classList.toggle('fields-disabled', !on);
+    }
+
+    // ── LEGAL TEXTS (data/imprint.json, data/privacy.json) ──
+    const LEGAL_FILES = { imprint: 'data/imprint.json', privacy: 'data/privacy.json' };
+    const LEGAL_LABELS = { imprint: 'Imprint', privacy: 'Privacy Policies' };
+    const LEGAL_PAGES = { imprint: 'imprint', privacy: 'privacy-policies' };
+    let legalDocs = { imprint: [], privacy: [] };
+    let legalLoaded = { imprint: false, privacy: false };
+    let currentLegalDoc = 'imprint';
+    let legalIdCounter = 0;
+
+    async function loadLegalFromGitHub() {
+      for (const key of Object.keys(LEGAL_FILES)) {
+        try {
+          const data = await getGitHubFile(LEGAL_FILES[key], '{"sections":[]}');
+          const parsed = JSON.parse(b64_to_utf8(data.content));
+          const sections = Array.isArray(parsed.sections) ? parsed.sections : [];
+          legalDocs[key] = sections.map(sec => ({ ...sec, _id: 'lg' + (++legalIdCounter) }));
+          legalLoaded[key] = true;
+        } catch (err) {
+          legalLoaded[key] = false;
+          console.error('Legal load error:', err);
+        }
+      }
+      renderLegalEditor();
+    }
+
+    function switchLegalDoc(key) {
+      currentLegalDoc = key;
+      document.getElementById('legalSegImprint').classList.toggle('active', key === 'imprint');
+      document.getElementById('legalSegPrivacy').classList.toggle('active', key === 'privacy');
+      document.getElementById('legalViewLink').href = LEGAL_PAGES[key];
+      document.querySelector('#btnSaveLegal span').textContent = 'Save ' + LEGAL_LABELS[key];
+      renderLegalEditor();
+    }
+
+    function renderLegalEditor() {
+      const box = document.getElementById('legalEditor');
+      const key = currentLegalDoc;
+      if (!legalLoaded[key]) {
+        box.innerHTML = `<p class="error-text">Could not load ${LEGAL_FILES[key]}. Please reload the dashboard.</p>`;
+        return;
+      }
+      const sections = legalDocs[key];
+      if (!sections.length) {
+        box.innerHTML = '<p class="empty">No sections yet. Click "Add Section" to start.</p>';
+        return;
+      }
+      const numbered = key === 'privacy';
+      box.innerHTML = sections.map((sec, i) => `
+        <div class="legal-section card glass" data-id="${sec._id}">
+          <div class="legal-section-head">
+            ${numbered ? `<span class="legal-num">${i + 1}</span>` : ''}
+            <input type="text" value="${escapeHtml(sec.title || '')}" placeholder="Section title" aria-label="Section title"
+              oninput="updateLegalField('${sec._id}', 'title', this.value)">
+            <button class="btn-icon" onclick="moveLegalSection('${sec._id}', -1)" aria-label="Move up" ${i === 0 ? 'disabled style="opacity:.35"' : ''}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+            </button>
+            <button class="btn-icon" onclick="moveLegalSection('${sec._id}', 1)" aria-label="Move down" ${i === sections.length - 1 ? 'disabled style="opacity:.35"' : ''}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <button class="btn-icon danger" onclick="deleteLegalSection('${sec._id}')" aria-label="Delete section">${ICON.trash}</button>
+          </div>
+          <textarea rows="6" placeholder="Text..." aria-label="Section text"
+            oninput="updateLegalField('${sec._id}', 'body', this.value)">${escapeHtml(sec.body || '')}</textarea>
+        </div>`).join('');
+    }
+
+    function updateLegalField(id, field, value) {
+      const sec = legalDocs[currentLegalDoc].find(s => s._id === id);
+      if (sec) sec[field] = value;
+    }
+
+    function addLegalSection() {
+      legalDocs[currentLegalDoc].push({ title: '', body: '', _id: 'lg' + (++legalIdCounter) });
+      renderLegalEditor();
+      const inputs = document.querySelectorAll('#legalEditor .legal-section-head input');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    }
+
+    function moveLegalSection(id, dir) {
+      const list = legalDocs[currentLegalDoc];
+      const i = list.findIndex(s => s._id === id);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= list.length) return;
+      [list[i], list[j]] = [list[j], list[i]];
+      renderLegalEditor();
+    }
+
+    function deleteLegalSection(id) {
+      if (!confirm('Delete this section?')) return;
+      legalDocs[currentLegalDoc] = legalDocs[currentLegalDoc].filter(s => s._id !== id);
+      renderLegalEditor();
+    }
+
+    async function saveLegalToGitHub() {
+      const key = currentLegalDoc;
+      if (!legalLoaded[key]) return toast('Texts are not loaded yet, please reload the dashboard.', 'error');
+      const sections = legalDocs[key]
+        .map(({ _id, ...rest }) => ({ ...rest, title: String(rest.title || '').trim(), body: String(rest.body || '').trim() }))
+        .filter(sec => sec.title || sec.body);
+      if (sections.some(sec => !sec.title)) return toast('Every section needs a title.', 'error');
+      if (!sections.length) return toast('Add at least one section before saving.', 'error');
+
+      await withBusy(document.getElementById('btnSaveLegal'), async () => {
+        try {
+          const jsonString = JSON.stringify({ sections }, null, 2);
+          await saveGitHubFile(LEGAL_FILES[key], utf8_to_b64(jsonString), `Update ${LEGAL_FILES[key].split('/').pop()} via Admin Dashboard`);
+          toast(LEGAL_LABELS[key] + ' successfully saved to GitHub!');
+        } catch (err) {
+          toast('Error saving: ' + err.message, 'error');
+        }
+      });
     }
 
     // ── ASSETS LOGIC & DROPDOWNS ──
