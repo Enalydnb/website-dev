@@ -72,5 +72,14 @@
     "venue": "Club Katze",
     "city": "Würzburg, DE",
     "tickets": "https://indecentbass.nightowl.app/de-DE"
+  },
+  {
+    "date": "03.07.2027",
+    "title": "RAMPAGE OPEN AIR",
+    "venue": "Kristalpark",
+    "city": "Lommel, BE",
+    "tickets": "",
+    "doorsale": false,
+    "soldOut": false
   }
 ]
