@@ -490,7 +490,9 @@
       margin-bottom: 1.25rem;
     }
     /* One row per line from the admin; squares only between comma-separated names of the same line */
+    .ref-block { container-type: inline-size; }
     .ref-list {
+      --ref-max: clamp(1.7rem, 3.6vw, 3.2rem);
       list-style: none;
       display: flex;
       flex-direction: column;
@@ -499,7 +501,9 @@
       max-width: 1000px;
       margin: 0 auto;
       font-family: var(--font-display);
-      font-size: clamp(1.7rem, 3.6vw, 3.2rem);
+      font-size: var(--ref-max);
+      /* as big as allowed, but never wider than the box (row width in em is measured once by JS) */
+      font-size: min(var(--ref-max), calc(97cqi / var(--row-em, 1)));
       line-height: 1.15;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -526,12 +530,13 @@
     /* Phones: same rows and squares as desktop, tighter spacing; JS scales the font to fit */
     @media (max-width: 600px) {
       .refs-panel { padding-left: 0.75rem; padding-right: 0.75rem; }
-      .ref-list { font-size: 2rem; }
-      .ref-row { gap: 0.1em 0.4em; }
-      .ref-item:not(:last-child)::after { margin-left: 0.9em; } /* = 0.4em of the name size */
+      .ref-list { --ref-max: 1.75rem; gap: 0.2em; }
+      .ref-row { gap: 0.1em 0.5em; }
+      .ref-item:not(:last-child)::after { margin-left: 1.1em; } /* = 0.5em of the name size */
     }
-    /* Safety net: if a row is so long it would get unreadably small, let it wrap instead */
-    .ref-list.is-tight .ref-row { flex-wrap: wrap; }
+    /* Safety net: never smaller than 15px – a very long row then wraps instead of shrinking further */
+    .ref-list { font-size: max(15px, min(var(--ref-max), calc(97cqi / var(--row-em, 1)))); }
+    .ref-row { flex-wrap: wrap; }
 
     /* ---------- BOOKING ---------- */
     .booking-panel {
@@ -675,6 +680,10 @@
       .hero-inner { position: relative; z-index: 1; margin-top: -2.5rem; padding-top: 0; }
       .hero-logo img { width: min(78vw, 360px); }
       .hero-actions { width: 100%; }
+      /* Next show: same width as the two buttons above, no logo indent */
+      .next-show.is-ready { display: flex; width: 100%; margin-left: 0; }
+      .next-show.is-ready { display: flex; width: 100%; margin-left: 0; }
+      .next-show .ns-text { flex: 1; }
       .hero-actions .btn { flex: 1 1 auto; }
       .event-list { grid-auto-rows: auto; }
       .event-card { grid-template-columns: 64px minmax(0, 1fr); gap: 0.9rem; }
@@ -1017,9 +1026,20 @@
         .filter(row => row.length);
     }
 
+    // Phones: always two names per row (no matter how the lines are set in the dashboard)
+    const REF_MOBILE = window.matchMedia('(max-width: 600px)');
+    function pairUp(rows) {
+      const names = rows.flat(), pairs = [];
+      for (let i = 0; i < names.length; i += 2) pairs.push(names.slice(i, i + 2));
+      return pairs;
+    }
+    const refSources = {};
+
     function renderRefList(rawText, containerId) {
       const container = document.getElementById(containerId);
-      const rows = parseRefRows(rawText);
+      refSources[containerId] = rawText;
+      const parsed = parseRefRows(rawText);
+      const rows = REF_MOBILE.matches ? pairUp(parsed) : parsed;
       container.closest('.ref-block').hidden = !rows.length;
       container.innerHTML = rows.map(row =>
         `<li class="ref-row">${row.map(item => `<span class="ref-item">${escapeHtml(item)}</span>`).join('')}</li>`
@@ -1029,36 +1049,30 @@
       fitRefLists();
     }
 
-    // Shrink the font size until the widest row fits (keeps the row layout on phones).
-    // Both lists share one size so "Shared the stage with" and "Played at" look the same.
+    // Font size for the name rows.
+    // JS only measures how wide the widest row is *relative to its font size* (in em) – that number
+    // never changes while scrolling. The browser then scales the text with CSS (container units),
+    // so the rows always fit, also when the iPhone address bar shows/hides or the phone is rotated.
     function fitRefLists() {
       const lists = [...document.querySelectorAll('.ref-list')];
-      lists.forEach(list => { list.style.fontSize = ''; list.classList.remove('is-tight'); });
-      const MIN_SIZE = 16; // px, never smaller than this
-      let ratio = 1;
+      let rowEm = 0;
       lists.forEach(list => {
-        const available = list.parentElement.clientWidth;
-        const widest = Math.max(0, ...[...list.children].map(row => row.scrollWidth));
-        if (widest > available && available > 0) ratio = Math.min(ratio, available / widest);
-      });
-      if (ratio < 1) {
-        lists.forEach(list => {
-          const base = parseFloat(getComputedStyle(list).fontSize);
-          const size = Math.floor(base * ratio * 0.98);
-          list.style.fontSize = Math.max(size, MIN_SIZE) + 'px';
-          if (size < MIN_SIZE) list.classList.add('is-tight');
+        const fs = parseFloat(getComputedStyle(list).fontSize) || 16;
+        [...list.children].forEach(row => {
+          row.style.flexWrap = 'nowrap';            // measure the row in one line
+          rowEm = Math.max(rowEm, row.scrollWidth / fs);
+          row.style.flexWrap = '';
         });
-      }
+      });
+      // both lists share one size so "Shared the stage with" and "Played at" look the same
+      if (rowEm > 0) document.getElementById('refs').style.setProperty('--row-em', rowEm.toFixed(3));
     }
-    let fitTimer;
-    let lastFitWidth = window.innerWidth;
-    window.addEventListener('resize', () => {
-      if (window.innerWidth === lastFitWidth) return; // height-only change (e.g. iOS address bar while scrolling)
-      lastFitWidth = window.innerWidth;
-      clearTimeout(fitTimer);
-      fitTimer = setTimeout(fitRefLists, 120);
-    });
+    // re-measure once the brand font has loaded (the fallback font is wider, so before that the text is only smaller, never too big)
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitRefLists);
+    // switching between phone and desktop layout (e.g. rotating a tablet) → rebuild the rows
+    REF_MOBILE.addEventListener('change', () => {
+      Object.keys(refSources).forEach(id => renderRefList(refSources[id], id));
+    });
 
     loadContent();
 
