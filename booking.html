@@ -31,7 +31,7 @@
   <!-- Cloudflare Turnstile captcha -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <link rel="stylesheet" href="css/enaly.css?v=20261104c">
+  <link rel="stylesheet" href="css/enaly.css?v=20261105a">
 
   <style>
     /* ==================== BOOKING · split screen ==================== */
@@ -364,10 +364,24 @@
         </div>
       </div>
     </div>
-    <div class="footer-word" aria-hidden="true">Enaly</div>
+    <div class="footer-word" aria-hidden="true">
+      <span class="footer-word-text">Enaly</span>
+      <!-- Logo as thin outline (same look as the outlined text). js/site.js sizes it once the logo has loaded. -->
+      <svg class="footer-logo" data-footer-logo hidden xmlns="http://www.w3.org/2000/svg" focusable="false">
+        <defs>
+          <filter id="footerLogoOutline" color-interpolation-filters="sRGB">
+            <feMorphology in="SourceAlpha" operator="erode" radius="1" result="inner"/>
+            <feComposite in="SourceAlpha" in2="inner" operator="out" result="edge"/>
+            <feFlood flood-color="#FFFFFF" flood-opacity="0.16"/>
+            <feComposite in2="edge" operator="in"/>
+          </filter>
+        </defs>
+        <image href="assets/logo.png" filter="url(#footerLogoOutline)"/>
+      </svg>
+    </div>
   </footer>
 
-  <script src="js/site.js?v=20261104c"></script>
+  <script src="js/site.js?v=20261105a"></script>
   <script src="js/cookie-banner.js?v=20261104c"></script>
   <script src="js/booking-form.js?v=20261104c"></script>
   <script>
