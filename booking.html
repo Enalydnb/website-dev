@@ -38,14 +38,13 @@
     .booking-split {
       display: grid;
       grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-      min-height: 100svh;
     }
 
     /* Left: full-height photo with headline */
     .booking-visual {
-      position: sticky;
-      top: 0;
-      height: 100svh;
+      /* as tall as the form column: photo, headline and form box end on the same line */
+      position: relative;
+      min-height: 560px;
       overflow: hidden;
       isolation: isolate;
       display: flex;
@@ -85,23 +84,6 @@
     .booking-home img { height: 24px; width: auto; filter: brightness(0) invert(1); }
     .booking-home:hover { opacity: 0.75; }
 
-    .booking-visual .kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      align-self: flex-start;
-      margin-bottom: 1.1rem;
-      padding: 0.4rem 0.85rem;
-      border-radius: var(--radius-pill);
-      background: rgba(0,0,0,0.55);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-    .booking-visual .kicker svg { width: 14px; height: 14px; color: var(--pink); }
 
     .booking-visual h1 {
       font-family: var(--font-display);
@@ -117,11 +99,10 @@
     .booking-content {
       /* Desktop: content sits at the bottom of the first screen, so the form box ends
          level with the headline on the left (same bottom padding as the photo side) */
-      min-height: 100svh;
-      padding: clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+      /* top of the text level with the logo, bottom of the form level with the headline */
+      padding: clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
       gap: 1.75rem;
       max-width: 760px;
     }
@@ -251,7 +232,7 @@
       .booking-visual::after {
         background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, #000 100%);
       }
-      .booking-content { max-width: none; min-height: 0; justify-content: flex-start; padding-top: 0.5rem; padding-bottom: clamp(2rem, 5vw, 3rem); }
+      .booking-content { max-width: none; padding-top: 0.5rem; padding-bottom: clamp(2rem, 5vw, 3rem); }
     }
     @media (max-width: 600px) {
       .booking-form { grid-template-columns: 1fr; }
@@ -267,7 +248,6 @@
     <header class="booking-visual">
       <img id="imgWorking" src="assets/working.jpg" alt="Enaly Working DJ Set" fetchpriority="high">
       <a href="/" class="booking-home" aria-label="Enaly Home"><img src="assets/logo.png" alt="Enaly Logo"></a>
-      <span class="kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>Booking</span>
       <h1>Want to make some noise together?</h1>
     </header>
 

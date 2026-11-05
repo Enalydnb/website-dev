@@ -368,6 +368,29 @@
       cursor: pointer;
     }
     .rt-btn svg { width: 16px; height: 16px; }
+    .rt-toolbar { flex-wrap: wrap; align-items: center; }
+    .rt-btn.rt-icon { width: 36px; padding: 0; justify-content: center; }
+    .rt-sep { width: 1px; height: 22px; background: var(--glass-border); margin: 0 0.15rem; }
+    .rt-size {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      height: 36px; padding: 0 0 0 0.6rem;
+      border-radius: 8px; border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.04); color: var(--text-muted);
+    }
+    .rt-size svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .rt-size select {
+      width: auto; height: 34px; padding: 0 2rem 0 0.2rem;
+      border: none; background-color: transparent; box-shadow: none;
+      font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+      background-position: right 0.5rem center;
+    }
+    .rt-size select:focus { box-shadow: none; }
+    .rt-editor i, .rt-editor em { font-style: italic; }
+    .rt-editor u { text-decoration: underline; text-underline-offset: 3px; }
+    .rt-editor ol { margin: 0 0 0.75rem 1.5rem; }
+    .rt-editor font[size="1"], .rt-editor font[size="2"], .rt-editor .fs-s { font-size: 0.85em; }
+    .rt-editor font[size="4"], .rt-editor font[size="5"], .rt-editor .fs-l { font-size: 1.25em; }
+    .rt-editor font[size="6"], .rt-editor font[size="7"], .rt-editor .fs-xl { font-size: 1.55em; line-height: 1.3; }
     .rt-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
     .rt-btn.is-active { background: var(--pink-soft); border-color: var(--pink-line); color: var(--text-primary); }
     .rt-editor {
@@ -614,6 +637,7 @@
 
   <!-- Include config file -->
   <script src="js/config.js"></script>
+  <script src="js/richtext.js?v=20261105d"></script>
 </head>
 <body>
   <div class="ambient" aria-hidden="true"></div>
@@ -764,6 +788,28 @@
             About / Bio
           </div>
           <div class="rt-wrap">
+            <div class="rt-toolbar">
+              <button type="button" class="rt-btn rt-icon" data-cmd="bold" title="Bold (Ctrl+B)" aria-label="Bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h8a4 4 0 0 1 0 8H6zM6 12h9a4 4 0 0 1 0 8H6z"/></svg></button>
+              <button type="button" class="rt-btn rt-icon" data-cmd="italic" title="Italic (Ctrl+I)" aria-label="Italic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 4h-9M14 20H5M15 4 9 20"/></svg></button>
+              <button type="button" class="rt-btn rt-icon" data-cmd="underline" title="Underline (Ctrl+U)" aria-label="Underline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4v6a6 6 0 0 0 12 0V4M4 20h16"/></svg></button>
+              <span class="rt-sep" aria-hidden="true"></span>
+              <label class="rt-size" title="Text size">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+                <select data-size aria-label="Text size">
+                  <option value="2">Small</option>
+                  <option value="3" selected>Normal</option>
+                  <option value="5">Large</option>
+                  <option value="6">Extra large</option>
+                </select>
+              </label>
+              <span class="rt-sep" aria-hidden="true"></span>
+              <button type="button" class="rt-btn rt-icon" data-cmd="insertUnorderedList" title="Bullet list" aria-label="Bullet list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
+              <button type="button" class="rt-btn rt-icon" data-cmd="insertOrderedList" title="Numbered list" aria-label="Numbered list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></button>
+              <span class="rt-sep" aria-hidden="true"></span>
+              <button type="button" class="rt-btn rt-icon" data-cmd="undo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg></button>
+              <button type="button" class="rt-btn rt-icon" data-cmd="redo" title="Redo (Ctrl+Y)" aria-label="Redo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7L21 13"/></svg></button>
+              <button type="button" class="rt-btn" data-cmd="removeFormat" title="Remove formatting from the selected text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V4h16v3M5 20h6M13 4 8 20M15 15l5 5M20 15l-5 5"/></svg>Clear</button>
+            </div>
             <div id="textContentAbout" class="rt-editor is-about" contenteditable="true" role="textbox" aria-multiline="true"
               aria-label="About text" data-placeholder="Write your bio here..." data-mode="about"></div>
           </div>
@@ -955,6 +1001,7 @@
       setupDropzone();
       loadLegalFromGitHub();
       RichText.attach(document.getElementById('textContentAbout'));
+      RichText.attachToolbar(document.getElementById('textContentAbout').closest('.rt-wrap'));
     });
 
     // ── TOASTS (replace blocking alerts) ──
@@ -1336,7 +1383,7 @@
         localContent = JSON.parse(decodedContent);
 
         const aboutEl = document.getElementById('textContentAbout');
-        aboutEl.innerHTML = RichText.aboutToHtml(localContent.about || "");
+        aboutEl.innerHTML = EnalyRich.toHtml(localContent.about || "") || '<p><br></p>';
         RichText.refreshEmpty(aboutEl);
         document.getElementById('textContentSharedStage').value = localContent.sharedStage || "";
         document.getElementById('textContentSelectedShows').value = localContent.selectedShows || "";
@@ -1365,7 +1412,10 @@
           }
           localContent = {
             ...localContent, // keep any keys this dashboard doesn't edit
-            about: RichText.toAbout(document.getElementById('textContentAbout')),
+            about: (() => {
+              const el = document.getElementById('textContentAbout');
+              return el.textContent.trim() ? EnalyRich.sanitize(el.innerHTML) : '';
+            })(),
             sharedStage: document.getElementById('textContentSharedStage').value,
             selectedShows: document.getElementById('textContentSelectedShows').value,
             imgHeader: document.getElementById('selectImgHeader').value || localContent.imgHeader || "assets/header.jpg",
@@ -1485,14 +1535,19 @@
           if (onChange) onChange();
         });
         el.addEventListener('keydown', e => {
-          // About has no bold on the website → block Ctrl/Cmd+B, I, U there
-          if (about && (e.ctrlKey || e.metaKey) && /^[biu]$/i.test(e.key)) e.preventDefault();
+          // Legal texts only know bold → block italic/underline shortcuts there
+          if (!about && (e.ctrlKey || e.metaKey) && /^[iu]$/i.test(e.key)) e.preventDefault();
         });
         el.addEventListener('paste', e => {
-          // paste as plain text so no foreign fonts/colours sneak in
           e.preventDefault();
-          const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-          document.execCommand('insertText', false, text);
+          const data = e.clipboardData || window.clipboardData;
+          const html = about ? data.getData('text/html') : '';
+          if (html) {
+            // About: keep bold/italic/underline/lists from Word, drop fonts and colours
+            document.execCommand('insertHTML', false, EnalyRich.sanitize(html));
+          } else {
+            document.execCommand('insertText', false, data.getData('text/plain'));
+          }
         });
         el.addEventListener('drop', e => e.preventDefault());
         refreshEmpty(el);
@@ -1500,11 +1555,43 @@
       function attachToolbar(wrap) {
         const editor = wrap.querySelector('.rt-editor');
         const buttons = wrap.querySelectorAll('.rt-btn');
-        const update = () => buttons.forEach(b => {
-          let on = false;
-          try { on = document.queryCommandState(b.dataset.cmd); } catch (e) {}
-          b.classList.toggle('is-active', on && editor.contains(document.getSelection().anchorNode));
-        });
+        const sizeSelect = wrap.querySelector('select[data-size]');
+        const STATEFUL = /^(bold|italic|underline|insertUnorderedList|insertOrderedList)$/;
+        const update = () => {
+          const inside = editor.contains(document.getSelection().anchorNode);
+          buttons.forEach(b => {
+            let on = false;
+            if (STATEFUL.test(b.dataset.cmd)) { try { on = document.queryCommandState(b.dataset.cmd); } catch (e) {} }
+            b.classList.toggle('is-active', on && inside);
+          });
+          if (sizeSelect && inside) {
+            let v = '3';
+            try { v = String(document.queryCommandValue('fontSize') || '3'); } catch (e) {}
+            const map = { '1': '2', '2': '2', '3': '3', '4': '5', '5': '5', '6': '6', '7': '6' };
+            const node = document.getSelection().anchorNode;
+            const span = node && (node.nodeType === 1 ? node : node.parentElement).closest('.fs-s, .fs-l, .fs-xl');
+            sizeSelect.value = span && (!v || v === '3') ? ({ 'fs-s': '2', 'fs-l': '5', 'fs-xl': '6' })[[...span.classList].find(c => c.startsWith('fs-'))] : (map[v] || '3');
+          }
+        };
+        if (sizeSelect) {
+          let saved = null;
+          // remember the selection before the dropdown takes the focus
+          sizeSelect.addEventListener('mousedown', () => {
+            const sel = document.getSelection();
+            saved = sel.rangeCount && editor.contains(sel.anchorNode) ? sel.getRangeAt(0).cloneRange() : null;
+          });
+          sizeSelect.addEventListener('focus', () => {
+            const sel = document.getSelection();
+            if (!saved && sel.rangeCount && editor.contains(sel.anchorNode)) saved = sel.getRangeAt(0).cloneRange();
+          });
+          sizeSelect.addEventListener('change', () => {
+            editor.focus();
+            if (saved) { const sel = document.getSelection(); sel.removeAllRanges(); sel.addRange(saved); }
+            document.execCommand('fontSize', false, sizeSelect.value);
+            editor.dispatchEvent(new Event('input'));
+            saved = null;
+          });
+        }
         buttons.forEach(btn => {
           btn.addEventListener('mousedown', e => e.preventDefault()); // keep the text selection
           btn.addEventListener('click', () => {
