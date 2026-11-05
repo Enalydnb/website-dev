@@ -48,6 +48,31 @@
       });
     });
 
+    // Footer: outlined logo instead of the outlined "ENALY" text
+    document.querySelectorAll('[data-footer-logo]').forEach(function (svg) {
+      var image = svg.querySelector('image');
+      var morph = svg.querySelector('feMorphology');
+      var src = image.getAttribute('href');
+      var probe = new Image();
+      probe.onload = function () {
+        var w = probe.naturalWidth, h = probe.naturalHeight;
+        if (!w || !h) return;
+        svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+        image.setAttribute('width', w);
+        image.setAttribute('height', h);
+        svg.hidden = false;
+        svg.parentElement.classList.add('has-logo');
+        // keep the outline about 1 screen pixel thick, whatever the logo's resolution
+        function sizeStroke() {
+          var shown = svg.getBoundingClientRect().width || 1;
+          morph.setAttribute('radius', Math.max(1, (w / shown) * 1.1).toFixed(2));
+        }
+        sizeStroke();
+        window.addEventListener('resize', sizeStroke);
+      };
+      probe.src = src; // if the logo fails to load, the outlined text stays
+    });
+
     // Reveal on scroll
     var revealEls = document.querySelectorAll('.reveal');
     if (!('IntersectionObserver' in window)) {
