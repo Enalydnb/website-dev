@@ -137,6 +137,7 @@
     .next-show {
       display: none;
       margin-top: 1.5rem;
+      margin-left: var(--logo-inset, 0px); /* starts exactly where the visible logo starts */
       align-items: center;
       gap: 0.9rem;
       padding: 0.6rem 0.6rem 0.6rem 1rem;
@@ -1052,6 +1053,37 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitRefLists);
 
     loadContent();
+
+    // The logo file has empty (transparent) space on its left. Measure it once,
+    // so the "Next show" pill lines up with the visible left edge of the logo.
+    (function alignToLogo() {
+      const img = document.querySelector('.hero-logo img');
+      if (!img) return;
+      let inset = 0; // share of the image width that is empty on the left
+      function measure() {
+        try {
+          const w = img.naturalWidth, h = img.naturalHeight;
+          if (!w || !h) return;
+          const c = document.createElement('canvas'); c.width = w; c.height = h;
+          const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+          const data = ctx.getImageData(0, 0, w, h).data;
+          let first = w;
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < first; x++) {
+              if (data[(y * w + x) * 4 + 3] > 20) { first = x; break; }
+            }
+          }
+          inset = first < w ? first / w : 0;
+          apply();
+        } catch (e) { /* image not readable → keep the pill where it is */ }
+      }
+      function apply() {
+        const px = Math.round(img.getBoundingClientRect().width * inset);
+        document.documentElement.style.setProperty('--logo-inset', px + 'px');
+      }
+      if (img.complete) measure(); else img.addEventListener('load', measure);
+      window.addEventListener('resize', apply);
+    })();
 
     // ---------- Events loader (data/events.json) ----------
     function parseDate(dateStr) {
