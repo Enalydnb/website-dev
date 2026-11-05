@@ -165,9 +165,6 @@ button { font: inherit; color: inherit; }
 }
 .site-nav.is-scrolled { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); }
 
-/* Booking: plain link on desktop, pink pill only on phones */
-.nav-cta { display: none !important; }
-
 .nav-logo { display: inline-flex; align-items: center; cursor: pointer; }
 .nav-logo-img {
   height: 24px;
@@ -243,11 +240,9 @@ button { font: inherit; color: inherit; }
     transition: background var(--transition-smooth), box-shadow var(--transition-smooth);
   }
   .site-nav.is-scrolled { background: rgba(0, 0, 0, 0.85); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6); }
-  .nav-cta { display: inline-flex !important; }
   .nav-logo-img { height: 19px; }
   .nav-links { display: none; }
   .nav-toggle { display: inline-flex; }
-  .nav-cta .btn-label-long { display: none; }
 
   .nav-sheet {
     display: block;
