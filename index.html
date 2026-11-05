@@ -255,7 +255,10 @@
       padding: 0.6rem 0.4rem;
       white-space: nowrap;
     }
-    @media (max-width: 600px) { .ticket-cell { justify-content: flex-start; } }
+    @media (max-width: 600px) {
+      .ticket-cell { justify-content: center; }
+      .sold-out { width: 100%; justify-content: center; }
+    }
 
     /* ---------- ABOUT ---------- */
     .about-grid {
@@ -332,7 +335,7 @@
     /* ---------- EVENTS ---------- */
     .events-layout {
       display: grid;
-      grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); /* wider Past column → less wrapping, less height */
       gap: 1.25rem;
       align-items: stretch; /* Upcoming + Past boxes always equally tall */
     }
@@ -359,16 +362,16 @@
     .events-layout.is-expanded { align-items: start; }
     .events-layout.is-expanded .past-panel { position: sticky; top: calc(var(--nav-h) + 1.25rem); }
     .event-list.is-expanded .event-card.is-extra { display: grid; }
-    .show-all { margin-top: 0.9rem; width: 100%; }
+    .show-all { margin-top: 0.75rem; width: 100%; }
     .show-all[hidden] { display: none; }
     .show-all svg { transition: transform var(--transition-fast); }
     .show-all[aria-expanded="true"] svg { transform: rotate(180deg); }
     .event-card {
       display: grid;
-      grid-template-columns: 84px minmax(0, 1fr) auto;
+      grid-template-columns: 72px minmax(0, 1fr) auto;
       gap: 1.25rem;
       align-items: center;
-      padding: 0.85rem 0.85rem 0.85rem 0.85rem;
+      padding: 0.7rem;
       border-radius: calc(var(--radius-card) - 4px);
       background: rgba(0,0,0,0.45);
       border: 1px solid var(--hairline);
@@ -392,7 +395,7 @@
     }
     .date-block .d {
       font-family: var(--font-display);
-      font-size: 2.6rem;
+      font-size: 2.3rem;
       color: var(--pink);
     }
     .date-block .my {
@@ -444,12 +447,20 @@
     .past-list { list-style: none; display: grid; }
     .past-item {
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-columns: 4.9rem minmax(0, 1fr); /* fixed date column → titles line up */
       gap: 0.25rem 1rem;
+      align-content: center;
       padding: 0.95rem 0;
       border-bottom: 1px solid var(--hairline);
     }
     .past-item:last-child { border-bottom: none; padding-bottom: 0; }
+    /* Desktop: the Past shows share the box height evenly, so there is no empty block at the bottom */
+    @media (min-width: 981px) {
+      .past-panel { display: flex; flex-direction: column; }
+      .past-list { flex: 1; grid-auto-rows: 1fr; }
+      .past-list.is-single { grid-auto-rows: auto; align-content: start; }
+      .past-item:last-child { padding-bottom: 0.95rem; }
+    }
     .past-date {
       font-family: var(--font-display);
       font-size: 1.25rem;
@@ -1183,6 +1194,7 @@
         pastContainer.innerHTML = recentPastList.length ? '' :
           `<li class="past-item"><span class="past-title" style="grid-column:1/-1;color:var(--text-secondary)">No recent past shows.</span></li>`;
 
+        pastContainer.classList.toggle('is-single', recentPastList.length <= 1);
         recentPastList.forEach(item => {
           const loc = locationLine(item);
           pastContainer.insertAdjacentHTML('beforeend', `
