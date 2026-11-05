@@ -244,20 +244,15 @@
     .ticket-cell { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
     .btn.is-static { cursor: default; }
     .btn.is-static:hover { background: rgba(255,255,255,0.04); border-color: var(--glass-border); }
-    .sold-out {
-      display: inline-flex;
-      align-items: center;
-      font-family: var(--font-display);
-      font-size: 1.35rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    /* Sold Out: same pill as Tickets/Doorsale, in pink, not clickable */
+    .btn.sold-out,
+    .btn.sold-out:hover {
       color: var(--pink);
-      padding: 0.6rem 0.4rem;
-      white-space: nowrap;
+      background: var(--pink-soft);
+      border-color: var(--pink-line);
     }
     @media (max-width: 600px) {
       .ticket-cell { justify-content: center; }
-      .sold-out { width: 100%; justify-content: center; }
     }
 
     /* ---------- ABOUT ---------- */
@@ -933,6 +928,7 @@
       cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
       ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>',
       err: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
+      soldout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="m9 12 2 2 4-4"/></svg>',
       door: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3M13 20h9M10 12v.01"/><path d="M13 4.6v16.1a1 1 0 0 1-1.2 1L5 20V5.6a2 2 0 0 1 1.5-1.9l4-1A2 2 0 0 1 13 4.6Z"/></svg>',
       arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>',
       send: '<svg class="icon-shift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>'
@@ -1090,7 +1086,7 @@
     // Sold Out (pink text) wins; otherwise ticket link and/or doorsale (same look as the ticket button)
     function isTrue(v) { return v === true || v === 'true'; }
     function ticketCell(item, ticketUrl) {
-      if (isTrue(item.soldOut)) return '<span class="sold-out">Sold Out</span>';
+      if (isTrue(item.soldOut)) return `<span class="btn btn-ghost btn-sm is-static sold-out">${ICONS.soldout}Sold Out</span>`;
       let html = '';
       if (ticketUrl) html += `<a href="${escapeHtml(ticketUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm event-ticket-link">${ICONS.ticket}Tickets</a>`;
       if (isTrue(item.doorsale)) html += `<span class="btn btn-ghost btn-sm is-static">${ICONS.door}Doorsale</span>`;
