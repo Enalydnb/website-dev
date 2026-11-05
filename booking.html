@@ -31,7 +31,7 @@
   <!-- Cloudflare Turnstile captcha -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <link rel="stylesheet" href="css/enaly.css?v=20261105b">
+  <link rel="stylesheet" href="css/enaly.css?v=20261105c">
 
   <style>
     /* ==================== BOOKING · split screen ==================== */
@@ -115,9 +115,13 @@
 
     /* Right: contact + form */
     .booking-content {
-      padding: clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 5vw, 4rem) clamp(2rem, 5vw, 3rem);
+      /* Desktop: content sits at the bottom of the first screen, so the form box ends
+         level with the headline on the left (same bottom padding as the photo side) */
+      min-height: 100svh;
+      padding: clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
       display: flex;
       flex-direction: column;
+      justify-content: flex-end;
       gap: 1.75rem;
       max-width: 760px;
     }
@@ -247,7 +251,7 @@
       .booking-visual::after {
         background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, #000 100%);
       }
-      .booking-content { max-width: none; padding-top: 0.5rem; }
+      .booking-content { max-width: none; min-height: 0; justify-content: flex-start; padding-top: 0.5rem; padding-bottom: clamp(2rem, 5vw, 3rem); }
     }
     @media (max-width: 600px) {
       .booking-form { grid-template-columns: 1fr; }

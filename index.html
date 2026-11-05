@@ -51,7 +51,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/enaly.css?v=20261105b">
+  <link rel="stylesheet" href="css/enaly.css?v=20261105c">
 
   <style>
     /* ==================== HOME · page layout ==================== */
@@ -355,6 +355,12 @@
 
     .event-list { display: grid; gap: 0.6rem; grid-auto-rows: 1fr; } /* all event cards as tall as the tallest */
     .count-badge[hidden] { display: none; }
+    .event-card.is-extra { display: none; }
+    .event-list.is-expanded .event-card.is-extra { display: grid; }
+    .show-all { margin-top: 0.9rem; width: 100%; }
+    .show-all[hidden] { display: none; }
+    .show-all svg { transition: transform var(--transition-fast); }
+    .show-all[aria-expanded="true"] svg { transform: rotate(180deg); }
     .event-card {
       display: grid;
       grid-template-columns: 84px minmax(0, 1fr) auto;
@@ -679,10 +685,6 @@
         <li><a href="#events" class="nav-link">Events</a></li>
         <li><a href="#booking" class="nav-link">Booking</a></li>
       </ul>
-      <a href="#booking" class="btn btn-primary btn-sm nav-cta nav-link">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4Z"/><path d="M13 7v2M13 15v2M13 11v2"/></svg>
-        Booking
-      </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navSheet" aria-label="Open menu">
         <svg class="icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
         <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
@@ -774,6 +776,10 @@
             <div class="event-list" id="upcomingEvents">
               <div class="empty-state">Loading shows…</div>
             </div>
+            <button type="button" class="btn btn-ghost btn-sm show-all" id="showAllEvents" aria-expanded="false" aria-controls="upcomingEvents" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              <span>Show all</span>
+            </button>
           </div>
 
           <aside class="panel glass reveal" aria-labelledby="pastTitle">
@@ -1072,6 +1078,8 @@
       return html;
     }
 
+    const UPCOMING_VISIBLE = 3; // shown before "Show all"
+
     async function loadEvents() {
       const upcomingContainer = document.getElementById('upcomingEvents');
       const pastContainer = document.getElementById('pastEvents');
@@ -1102,11 +1110,11 @@
         upcomingContainer.innerHTML = upcomingList.length ? '' :
           `<div class="empty-state">${ICONS.cal}<span>No upcoming shows announced. Stay tuned!</span></div>`;
 
-        upcomingList.forEach(item => {
+        upcomingList.forEach((item, idx) => {
           const ticketUrl = safeUrl(item.tickets);
           const loc = locationLine(item);
           upcomingContainer.insertAdjacentHTML('beforeend', `
-            <article class="event-card">
+            <article class="event-card${idx >= UPCOMING_VISIBLE ? ' is-extra' : ''}">
               ${dateBlock(item)}
               <div class="event-info">
                 <h4 class="event-title">${escapeHtml(item.title)}</h4>
@@ -1118,6 +1126,21 @@
               <div class="ticket-cell">${ticketCell(item, ticketUrl)}</div>
             </article>`);
         });
+
+        // More than 3 upcoming shows → "Show all" button
+        const showAll = document.getElementById('showAllEvents');
+        const extra = upcomingList.length - UPCOMING_VISIBLE;
+        showAll.hidden = extra <= 0;
+        if (extra > 0) {
+          const label = showAll.querySelector('span');
+          label.textContent = `Show all (${upcomingList.length})`;
+          showAll.onclick = () => {
+            const open = upcomingContainer.classList.toggle('is-expanded');
+            showAll.setAttribute('aria-expanded', open ? 'true' : 'false');
+            label.textContent = open ? 'Show less' : `Show all (${upcomingList.length})`;
+            if (!open) document.getElementById('events').scrollIntoView({ behavior: 'smooth' });
+          };
+        }
 
         // Next show pill in hero
         if (upcomingList.length) {
