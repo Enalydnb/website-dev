@@ -261,18 +261,25 @@
       display: grid;
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
       gap: clamp(2rem, 5vw, 4.5rem);
-      align-items: start;
+      align-items: stretch;
     }
+    /* Desktop: photo is exactly as tall as the text column (top and bottom flush), no scrolling along */
     .portrait-frame {
-      position: sticky;
-      top: calc(var(--nav-h) + 1.5rem);
+      position: relative;
       margin: 0;
+      min-height: 420px;
     }
     .portrait-frame img {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 25%;
       border-radius: var(--radius-card);
     }
+    .about-text > :last-child { margin-bottom: 0; }
+    .about-body > :first-child { margin-top: -0.3em; } /* cancels the line spacing above the first line → text starts level with the photo */
 
     .about-text p {
       font-size: clamp(1.05rem, 1.5vw, 1.2rem);
@@ -637,7 +644,8 @@
     }
     @media (max-width: 820px) {
       .about-grid { grid-template-columns: 1fr; }
-      .portrait-frame { position: relative; top: 0; max-width: 520px; }
+      .portrait-frame { max-width: 520px; min-height: 0; }
+      .portrait-frame img { position: static; height: auto; }
       .about-text { order: -1; }
     }
     @media (max-width: 600px) {
