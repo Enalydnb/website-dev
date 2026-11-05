@@ -1088,6 +1088,25 @@
 
     const UPCOMING_VISIBLE = 3; // shown before "Show all"
 
+    // Past box keeps the collapsed height while the upcoming list is opened
+    function lockPastHeight() {
+      const past = document.querySelector('.past-panel');
+      const layout = document.querySelector('.events-layout');
+      const list = document.getElementById('upcomingEvents');
+      const wasOpen = list.classList.contains('is-expanded');
+      past.style.height = '';
+      list.classList.remove('is-expanded'); layout.classList.remove('is-expanded');
+      const h = past.getBoundingClientRect().height;   // height with 3 shows, both boxes equal
+      if (wasOpen) { list.classList.add('is-expanded'); layout.classList.add('is-expanded'); }
+      if (window.matchMedia('(min-width: 981px)').matches) past.style.height = h + 'px';
+    }
+    let pastResizeWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+      if (window.innerWidth === pastResizeWidth) return;
+      pastResizeWidth = window.innerWidth;
+      if (document.getElementById('upcomingEvents').classList.contains('is-expanded')) lockPastHeight();
+    });
+
     async function loadEvents() {
       const upcomingContainer = document.getElementById('upcomingEvents');
       const pastContainer = document.getElementById('pastEvents');
@@ -1140,8 +1159,11 @@
           const label = showAll.querySelector('span');
           label.textContent = `Show all (${upcomingList.length})`;
           showAll.onclick = () => {
+            const willOpen = !upcomingContainer.classList.contains('is-expanded');
+            if (willOpen) lockPastHeight(); // keep the Past box exactly as tall as before
             const open = upcomingContainer.classList.toggle('is-expanded');
             document.querySelector('.events-layout').classList.toggle('is-expanded', open);
+            if (!open) document.querySelector('.past-panel').style.height = '';
             showAll.setAttribute('aria-expanded', open ? 'true' : 'false');
             label.textContent = open ? 'Show less' : `Show all (${upcomingList.length})`;
             if (!open) document.getElementById('events').scrollIntoView({ behavior: 'smooth' });

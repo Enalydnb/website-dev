@@ -149,6 +149,14 @@
       color: var(--text-primary);
     }
     .doc ul { margin: 1rem 0 0 1.2rem; display: grid; gap: 0.4rem; }
+    .doc ol { margin: 1rem 0 0 1.4rem; display: grid; gap: 0.4rem; }
+    .doc ol + p, .doc p + ol { margin-top: 1rem; }
+    .doc b { color: var(--text-primary); font-weight: 600; }
+    .doc i { font-style: italic; }
+    .doc u { text-decoration: underline; text-underline-offset: 3px; }
+    .doc .fs-s { font-size: 0.85em; }
+    .doc .fs-l { font-size: 1.25em; line-height: 1.5; }
+    .doc .fs-xl { font-size: 1.55em; line-height: 1.35; }
     .doc ul + p, .doc p + ul { margin-top: 1rem; }
     .doc a {
       color: var(--pink);
@@ -329,7 +337,8 @@
 
   <script src="js/site.js?v=20261105b"></script>
   <script src="js/cookie-banner.js?v=20261105b"></script>
-  <script src="js/legal.js?v=20261105b"></script>
+  <script src="js/richtext.js?v=20261105d"></script>
+  <script src="js/legal.js?v=20261105e"></script>
   <script>
     // Texts come from data/imprint.json (admin: Legal Texts). The HTML above is the fallback.
     (async function () {
