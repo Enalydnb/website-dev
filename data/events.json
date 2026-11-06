@@ -49,37 +49,10 @@
     "tickets": "https://www.eventim-light.com/de/a/5790efbae4b0780ff85d71ae/e/6ab64814b7344a6e5c929d9c?lang=de"
   },
   {
-    "date": "24.12.2026",
-    "title": "Weihnachten",
-    "venue": "Unterm Baum",
-    "city": "Zuhause",
-    "tickets": "",
-    "doorsale": true,
-    "soldOut": false
-  },
-  {
-    "date": "31.12.2026",
-    "title": "Silvester",
-    "venue": "Draußen",
-    "city": "Straße",
-    "tickets": "",
-    "doorsale": false,
-    "soldOut": true
-  },
-  {
     "date": "22.01.2027",
     "title": "Indecent Bass",
     "venue": "Club Katze",
     "city": "Würzburg, DE",
     "tickets": "https://indecentbass.nightowl.app/de-DE"
-  },
-  {
-    "date": "03.07.2027",
-    "title": "RAMPAGE OPEN AIR",
-    "venue": "Kristalpark",
-    "city": "Lommel, BE",
-    "tickets": "",
-    "doorsale": false,
-    "soldOut": false
   }
 ]
