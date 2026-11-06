@@ -37,7 +37,7 @@
   <!-- Cloudflare Turnstile captcha -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <link rel="stylesheet" href="css/enaly.css?v=20261105c">
+  <link rel="stylesheet" href="css/enaly.css?v=20261106a">
 
   <style>
     /* ==================== BOOKING · split screen ==================== */
@@ -228,6 +228,20 @@
 
     .booking-page .site-footer { margin-top: 0; }
 
+    /* Desktop: everything fits on one screen (like iamflowz.de) –
+       text top-right level with the logo, form box bottom level with the headline */
+    @media (min-width: 901px) {
+      .booking-split { min-height: 100svh; }
+      .booking-content { gap: 1.25rem; }
+      .booking-content .form-card { margin-top: auto; }
+      .booking-form { padding: 1.5rem 1.75rem; gap: 0.8rem 1rem; }
+      .form-intro { margin-bottom: 0; }
+      .form-intro strong { font-size: 1.55rem; }
+      .booking-form .field { gap: 0.35rem; }
+      .booking-form .field input, .booking-form .field textarea { padding: 0.65rem 0.9rem; }
+      .booking-form .field textarea { min-height: 84px; }
+      .booking-form .form-actions { margin-top: 0.15rem; }
+    }
     @media (max-width: 900px) {
       .booking-split { grid-template-columns: 1fr; min-height: 0; }
       .booking-visual {
@@ -300,7 +314,7 @@
             </div>
             <div class="field span-2">
               <label for="f-message">Message</label>
-              <textarea id="f-message" name="message" rows="4"></textarea>
+              <textarea id="f-message" name="message" rows="3"></textarea>
             </div>
 
             <div class="form-actions">
@@ -355,12 +369,12 @@
     </div>
   </footer>
 
-  <script src="js/site.js?v=20261105b"></script>
+  <script src="js/site.js?v=20261106a"></script>
   <script src="js/cookie-banner.js?v=20261105b"></script>
   <script src="js/booking-form.js?v=20261105b"></script>
   <script>
     // Booking image follows the assignment from the admin dashboard
-    fetch('data/content.json', { cache: 'no-cache' })
+    fetch('data/content.json?t=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(c => { if (c && c.imgWorking) document.getElementById('imgWorking').src = c.imgWorking; })
       .catch(() => {});
