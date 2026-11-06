@@ -311,6 +311,18 @@
     }
     .controls { display: flex; align-items: center; gap: 0.4rem; }
 
+    /* Past events grouped by year */
+    .past-head { margin: 1.4rem 0 0.6rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
+    .year-group { border: 1px solid var(--hairline); border-radius: calc(var(--radius-card) - 4px); margin-bottom: 0.55rem; background: rgba(255,255,255,0.02); }
+    .year-group > summary { list-style: none; display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 1rem; cursor: pointer; user-select: none; }
+    .year-group > summary::-webkit-details-marker { display: none; }
+    .year-group .year { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; letter-spacing: 0.02em; }
+    .year-group .year-count { font-size: 0.8rem; color: var(--text-secondary); }
+    .year-group .chev { width: 18px; height: 18px; margin-left: auto; color: var(--text-secondary); transition: transform var(--transition-fast); }
+    .year-group[open] .chev { transform: rotate(180deg); color: var(--pink); }
+    .year-group > summary:hover .year { color: var(--pink); }
+    .year-items { padding: 0 0.55rem 0.05rem; }
+
     .edit-form {
       display: none;
       padding: 1.1rem;
@@ -1586,9 +1598,47 @@
         return;
       }
 
-      list.innerHTML = localEvents.map((ev) => {
+      const upcomingEvents = localEvents.filter(ev => parseDateToTimestamp(ev.date) >= now);
+      const pastEvents = localEvents.filter(ev => parseDateToTimestamp(ev.date) < now);
+
+      // Past events grouped by year (newest year first); only the newest year is open by default.
+      // Nothing is removed from events.json – this is just a tidier view.
+      const byYear = new Map();
+      pastEvents.forEach(ev => {
+        const ts = parseDateToTimestamp(ev.date);
+        const year = ts ? String(new Date(ts).getFullYear()) : 'Unknown date';
+        if (!byYear.has(year)) byYear.set(year, []);
+        byYear.get(year).push(ev);
+      });
+      const years = [...byYear.keys()].sort((x, y) => (y === 'Unknown date' ? -1 : x === 'Unknown date' ? 1 : y - x));
+      // keep whatever is currently expanded/collapsed
+      list.querySelectorAll('.year-group').forEach(d => { if (d.open) openPastYears.add(d.dataset.year); else openPastYears.delete(d.dataset.year); });
+      if (!pastYearsInit) { if (years[0]) openPastYears.add(years[0]); pastYearsInit = true; }
+
+      list.innerHTML =
+        (upcomingEvents.length ? upcomingEvents.map(ev => eventItemHtml(ev, false)).join('') : '<p class="empty">No upcoming events.</p>') +
+        (years.length ? '<div class="past-head">Past events</div>' : '') +
+        years.map(year => `
+          <details class="year-group" data-year="${escapeHtml(year)}" ${openPastYears.has(year) ? 'open' : ''}>
+            <summary>
+              <span class="year">${escapeHtml(year)}</span>
+              <span class="year-count">${byYear.get(year).length} ${byYear.get(year).length === 1 ? 'event' : 'events'}</span>
+              <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <div class="year-items">${byYear.get(year).map(ev => eventItemHtml(ev, true)).join('')}</div>
+          </details>`).join('');
+
+      list.querySelectorAll('.year-group').forEach(d => d.addEventListener('toggle', () => {
+        if (d.open) openPastYears.add(d.dataset.year); else openPastYears.delete(d.dataset.year);
+      }));
+    }
+
+    // remembers which past years are expanded while working in the dashboard
+    const openPastYears = new Set();
+    let pastYearsInit = false;
+
+    function eventItemHtml(ev, isPast) {
         const id = ev._id;
-        const isPast = parseDateToTimestamp(ev.date) < now;
         const ticketInfo = ev.tickets ? `<a href="${escapeHtml(ev.tickets)}" target="_blank" rel="noopener">Ticket link</a>` : '';
         const location = [ev.venue, ev.city].filter(v => v && String(v).trim()).map(escapeHtml).join(', ');
         return `
@@ -1631,7 +1681,6 @@
               </div>
             </div>
           </div>`;
-      }).join('');
     }
 
     function openEditForm(id) {
