@@ -98,6 +98,63 @@
       align-self: flex-start;
     }
     .status-indicator .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+    /* ── Deploy status (GitHub Pages) ── */
+    .deploy-box { position: relative; }
+    .deploy-chip {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-body); font-size: 0.82rem; font-weight: 600;
+      letter-spacing: normal; text-transform: none;
+      cursor: pointer;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      transition: background var(--transition-fast), border-color var(--transition-fast);
+    }
+    .deploy-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); flex-shrink: 0; }
+    .deploy-chip .chev { width: 14px; height: 14px; transition: transform var(--transition-fast); }
+    .deploy-chip[aria-expanded="true"] .chev { transform: rotate(180deg); }
+    .deploy-chip.is-live { color: var(--green); background: rgba(0,230,118,0.08); border-color: rgba(0,230,118,0.25); }
+    .deploy-chip.is-live .dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
+    .deploy-chip.is-busy { color: #FFC34D; background: rgba(255,195,77,0.08); border-color: rgba(255,195,77,0.3); }
+    .deploy-chip.is-busy .dot { background: #FFC34D; animation: deployPulse 1.2s ease-in-out infinite; }
+    .deploy-chip.is-failed { color: #ff5c9e; background: var(--pink-soft); border-color: var(--pink-line); }
+    .deploy-chip.is-failed .dot { background: var(--pink); }
+    @keyframes deployPulse { 50% { opacity: 0.3; } }
+
+    .deploy-panel {
+      margin-top: 0.6rem;
+      padding: 0.85rem;
+      border-radius: var(--radius-inner);
+      background: rgba(0,0,0,0.75);
+      border: 1px solid var(--glass-border);
+    }
+    .deploy-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .deploy-head strong { font-size: 0.85rem; }
+    .deploy-refresh {
+      width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.04);
+      color: var(--text-muted); cursor: pointer;
+    }
+    .deploy-refresh svg { width: 14px; height: 14px; }
+    .deploy-refresh.is-spinning svg { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .deploy-list { list-style: none; display: grid; gap: 0.15rem; }
+    .deploy-item {
+      display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 0.15rem 0.55rem;
+      padding: 0.5rem 0.25rem; border-bottom: 1px solid var(--hairline);
+    }
+    .deploy-item:last-child { border-bottom: none; }
+    .deploy-item .ic { width: 16px; height: 16px; margin-top: 0.1rem; }
+    .deploy-item .ic.ok { color: var(--green); }
+    .deploy-item .ic.busy { color: #FFC34D; animation: spin 1.2s linear infinite; }
+    .deploy-item .ic.fail { color: var(--pink); }
+    .deploy-item .t { font-size: 0.8rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .deploy-item .m { grid-column: 2; font-size: 0.72rem; color: var(--text-secondary); }
+    .deploy-empty { font-size: 0.8rem; color: var(--text-secondary); padding: 0.4rem 0.25rem; }
+    .deploy-note { margin-top: 0.5rem; font-size: 0.72rem; color: var(--text-secondary); }
+
     .view-site {
       display: inline-flex; align-items: center; gap: 0.5rem;
       font-size: 0.85rem; color: var(--text-secondary); text-decoration: none; cursor: pointer;
@@ -560,7 +617,13 @@
       .brand-mark { width: 34px; height: 34px; }
       .brand h1 { font-size: 1.5rem; }
       .sidebar-foot { display: none; }
-      .mobile-status { display: inline-flex !important; }
+      .mobile-status { display: block !important; }
+      .mobile-status .deploy-panel {
+        position: absolute; right: 0; top: calc(100% + 0.6rem); z-index: 130;
+        width: min(340px, calc(100vw - 2rem)); margin-top: 0;
+        background: #0B0B0B;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.7);
+      }
 
       /* Tabs become an app-style bottom navigation */
       .nav-tabs {
@@ -661,7 +724,22 @@
             <small>Admin Dashboard</small>
           </div>
         </div>
-        <span class="status-indicator mobile-status"><span class="dot"></span>Online</span>
+        <div class="deploy-box mobile-status">
+        <button type="button" class="deploy-chip is-unknown" data-deploy-chip aria-expanded="false" aria-controls="deployPanelMobile">
+          <span class="dot" aria-hidden="true"></span><span class="deploy-label">Checking status…</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="deploy-panel" id="deployPanelMobile" hidden>
+          <div class="deploy-head">
+            <strong>Website updates</strong>
+            <button type="button" class="deploy-refresh" data-deploy-refresh title="Refresh" aria-label="Refresh status">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>
+            </button>
+          </div>
+          <ul class="deploy-list"><li class="deploy-empty">Loading…</li></ul>
+          <p class="deploy-note">After saving, changes usually go live within 1–2 minutes.</p>
+        </div>
+        </div>
       </div>
 
       <!-- Tabs navigation -->
@@ -689,7 +767,22 @@
       </nav>
 
       <div class="sidebar-foot">
-        <span class="status-indicator"><span class="dot"></span>Online</span>
+        <div class="deploy-box">
+        <button type="button" class="deploy-chip is-unknown" data-deploy-chip aria-expanded="false" aria-controls="deployPanelDesktop">
+          <span class="dot" aria-hidden="true"></span><span class="deploy-label">Checking status…</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="deploy-panel" id="deployPanelDesktop" hidden>
+          <div class="deploy-head">
+            <strong>Website updates</strong>
+            <button type="button" class="deploy-refresh" data-deploy-refresh title="Refresh" aria-label="Refresh status">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>
+            </button>
+          </div>
+          <ul class="deploy-list"><li class="deploy-empty">Loading…</li></ul>
+          <p class="deploy-note">After saving, changes usually go live within 1–2 minutes.</p>
+        </div>
+        </div>
         <a href="/" target="_blank" rel="noopener" class="view-site">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
           View website
@@ -1006,6 +1099,7 @@
       loadAssetsFromGitHub();
       setupDropzone();
       loadLegalFromGitHub();
+      Deploy.init();
       RichText.attach(document.getElementById('textContentAbout'));
       RichText.attachToolbar(document.getElementById('textContentAbout').closest('.rt-wrap'));
     });
@@ -1070,6 +1164,161 @@
     }
 
     // ── API HELPERS VIA CLOUDFLARE WORKER PROXY ──
+    // ── DEPLOY STATUS (GitHub Pages workflow "pages build and deployment") ──
+    // Reads the public GitHub API (no login needed). Repo: js/config.js may set githubRepo,
+    // otherwise dev.enaly.de → Enalydnb/website-dev, everything else → Enalydnb/website-prod.
+    const Deploy = (function () {
+      const host = location.hostname;
+      const REPO = (typeof githubRepo !== 'undefined' && githubRepo) ||
+        (/^dev\./.test(host) || host === 'localhost' || host === '127.0.0.1' ? 'Enalydnb/website-dev' : 'Enalydnb/website-prod');
+      const API = `https://api.github.com/repos/${REPO}/actions/runs?per_page=5`;
+      let etag = null, runs = [], apiOk = null, timer = null, tracking = null;
+
+      const ICON = {
+        ok: '<svg class="ic ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+        busy: '<svg class="ic busy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9"/></svg>',
+        fail: '<svg class="ic fail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+      };
+
+      function ago(iso) {
+        const sec = Math.max(0, Math.round((Date.now() - new Date(iso)) / 1000));
+        if (sec < 60) return 'just now';
+        const min = Math.round(sec / 60); if (min < 60) return `${min} min ago`;
+        const h = Math.round(min / 60); if (h < 24) return `${h} h ago`;
+        const d = Math.round(h / 24); return d === 1 ? 'yesterday' : `${d} days ago`;
+      }
+      // turn commit messages into plain words for the list
+      function friendly(title) {
+        const t = String(title || '');
+        let m;
+        if (/events\.json/i.test(t)) return 'Events updated';
+        if (/content\.json/i.test(t)) return 'Texts / images updated';
+        if (/imprint\.json/i.test(t)) return 'Imprint updated';
+        if (/privacy\.json/i.test(t)) return 'Privacy policy updated';
+        if ((m = t.match(/^Upload asset (.+?) via/i))) return 'Image uploaded: ' + m[1];
+        if ((m = t.match(/^Delete asset (.+?) via/i))) return 'Image deleted: ' + m[1].replace(/^assets\//, '');
+        return t || 'Website update';
+      }
+      function stateOf(run) {
+        if (!run) return 'unknown';
+        if (run.status !== 'completed') return 'busy';
+        return run.conclusion === 'success' ? 'live' : (run.conclusion === 'cancelled' || run.conclusion === 'skipped' ? 'live' : 'failed');
+      }
+
+      function setChip(state, label) {
+        document.querySelectorAll('[data-deploy-chip]').forEach(chip => {
+          chip.classList.remove('is-live', 'is-busy', 'is-failed', 'is-unknown');
+          chip.classList.add('is-' + state);
+          chip.querySelector('.deploy-label').textContent = label;
+        });
+      }
+      function render() {
+        const html = !runs.length
+          ? `<li class="deploy-empty">${apiOk === false ? 'Status from GitHub is not available right now.' : 'No updates yet.'}</li>`
+          : runs.map(r => {
+              const st = stateOf(r);
+              const icon = st === 'live' ? ICON.ok : st === 'busy' ? ICON.busy : ICON.fail;
+              const when = st === 'busy' ? 'publishing…' : st === 'failed' ? 'failed · ' + ago(r.updated_at) : 'live · ' + ago(r.updated_at);
+              return `<li class="deploy-item" title="${escapeHtml(r.display_title || '')}">${icon}<span class="t">${escapeHtml(friendly(r.display_title))}</span><span class="m">${when}</span></li>`;
+            }).join('');
+        document.querySelectorAll('.deploy-list').forEach(ul => { ul.innerHTML = html; });
+
+        if (tracking) return; // the chip shows the save that is being published
+        const latest = runs[0];
+        const st = stateOf(latest);
+        if (st === 'busy') setChip('busy', 'Publishing…');
+        else if (st === 'failed') setChip('failed', 'Publishing failed');
+        else if (st === 'live') setChip('live', 'Website live');
+        else setChip(apiOk === false ? 'unknown' : 'live', apiOk === false ? 'Status unknown' : 'Website live');
+      }
+
+      async function fetchRuns() {
+        document.querySelectorAll('[data-deploy-refresh]').forEach(b => b.classList.add('is-spinning'));
+        try {
+          const res = await fetch(API, { headers: etag ? { 'If-None-Match': etag, Accept: 'application/vnd.github+json' } : { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
+          if (res.status === 304) { apiOk = true; return runs; } // unchanged → does not count against GitHub's limit
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          etag = res.headers.get('ETag');
+          const data = await res.json();
+          runs = (data.workflow_runs || []).slice(0, 5);
+          apiOk = true;
+        } catch (e) {
+          apiOk = false;
+        } finally {
+          document.querySelectorAll('[data-deploy-refresh]').forEach(b => b.classList.remove('is-spinning'));
+          render();
+        }
+        return runs;
+      }
+
+      function schedule() {
+        clearTimeout(timer);
+        const busy = tracking || stateOf(runs[0]) === 'busy';
+        timer = setTimeout(async () => { if (!document.hidden || tracking) await fetchRuns(); if (tracking) await checkTracking(); schedule(); },
+                           busy ? 8000 : 120000);
+      }
+
+      // Fallback when GitHub's status is not reachable: compare the live file with what was saved
+      async function liveFileMatches(t) {
+        if (!t || !t.path) return false;
+        try {
+          const res = await fetch('/' + t.path + '?t=' + Date.now(), { cache: 'no-store' });
+          return res.ok && (await res.text()).trim() === t.text.trim();
+        } catch (e) { return false; }
+      }
+
+      async function checkTracking() {
+        if (!tracking) return;
+        const run = tracking.sha && runs.find(r => r.head_sha === tracking.sha);
+        let done = false, failed = false;
+        if (run && run.status === 'completed') { done = run.conclusion === 'success'; failed = !done && run.conclusion === 'failure'; }
+        if (!done && !failed && (!run || apiOk === false)) done = await liveFileMatches(tracking.file);
+        if (done) {
+          tracking = null;
+          setChip('live', 'Website live');
+          toast('Your change is now live on the website.');
+          render();
+        } else if (failed) {
+          tracking = null;
+          setChip('failed', 'Publishing failed');
+          toast('Publishing failed. Please try saving again or contact Florian.', 'error');
+          render();
+        } else if (Date.now() - tracking.start > 15 * 60 * 1000) {
+          tracking = null; render(); // give up quietly after 15 minutes
+        }
+      }
+
+      function track(sha, file) {
+        tracking = { sha: sha || null, file: file || null, start: Date.now() };
+        setChip('busy', 'Publishing…');
+        setTimeout(async () => { await fetchRuns(); await checkTracking(); schedule(); }, 4000);
+      }
+
+      function init() {
+        document.querySelectorAll('[data-deploy-chip]').forEach(chip => {
+          chip.addEventListener('click', () => {
+            const panel = document.getElementById(chip.getAttribute('aria-controls'));
+            const open = panel.hidden;
+            panel.hidden = !open;
+            chip.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) fetchRuns();
+          });
+        });
+        document.querySelectorAll('[data-deploy-refresh]').forEach(b => b.addEventListener('click', fetchRuns));
+        document.addEventListener('click', e => {
+          const mobilePanel = document.getElementById('deployPanelMobile');
+          if (mobilePanel && !mobilePanel.hidden && !e.target.closest('.mobile-status')) {
+            mobilePanel.hidden = true;
+            document.querySelector('[aria-controls="deployPanelMobile"]').setAttribute('aria-expanded', 'false');
+          }
+        });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) { fetchRuns(); schedule(); } });
+        fetchRuns().then(schedule);
+      }
+
+      return { init, track, fetchRuns };
+    })();
+
     // ── RECENT SAVES ──
     // GitHub's API can return the previous version of a file for a short while after a save
     // (and browsers may cache that answer). Without this, a reload right after saving shows the
@@ -1154,6 +1403,10 @@
         fileShaMap[path] = data.content.sha;
         if (!safePath.startsWith('assets/')) rememberSave(safePath, contentBase64, data.content.sha);
       }
+      // follow the publishing of this save in the status chip
+      try {
+        Deploy.track(data.commit && data.commit.sha, safePath.endsWith('.json') ? { path: safePath, text: b64_to_utf8(contentBase64) } : null);
+      } catch (e) {}
       return data;
     }
 
@@ -1184,6 +1437,8 @@
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.message || `HTTP ${res.status}`);
       }
+      const deleted = await res.json().catch(() => ({}));
+      try { Deploy.track(deleted.commit && deleted.commit.sha, null); } catch (e) {}
     }
 
     function utf8_to_b64(str) {
