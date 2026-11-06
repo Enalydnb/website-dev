@@ -520,6 +520,7 @@
       background: var(--bg-surface-accent);
     }
     .image-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+    .image-preview-box img:not([src]) { visibility: hidden; }
     .image-preview-box.is-mobile { aspect-ratio: 4 / 5; width: 60%; justify-self: center; }
     .hint-text { margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); }
 
@@ -944,7 +945,7 @@
               <label class="label" for="selectImgHeader">Header Banner Image · Desktop</label>
               <select id="selectImgHeader" onchange="updatePreview('selectImgHeader', 'prevHeader'); updatePreview('selectImgHeaderMobile', 'prevHeaderMobile')"></select>
             </div>
-            <div class="image-preview-box"><img id="prevHeader" src="assets/header.jpg" alt="Header Preview Desktop"></div>
+            <div class="image-preview-box"><img id="prevHeader" alt="Header Preview Desktop"></div>
           </div>
 
           <div class="image-select-row">
@@ -953,7 +954,7 @@
               <select id="selectImgHeaderMobile" onchange="updatePreview('selectImgHeaderMobile', 'prevHeaderMobile')"></select>
               <p class="hint-text">Shown on phones. A portrait or square image works best. "Same as desktop" uses the desktop image.</p>
             </div>
-            <div class="image-preview-box is-mobile"><img id="prevHeaderMobile" src="assets/header.jpg" alt="Header Preview Mobile"></div>
+            <div class="image-preview-box is-mobile"><img id="prevHeaderMobile" alt="Header Preview Mobile"></div>
           </div>
 
           <div class="image-select-row">
@@ -961,7 +962,7 @@
               <label class="label" for="selectImgAbout">About Portrait Image</label>
               <select id="selectImgAbout" onchange="updatePreview('selectImgAbout', 'prevAbout')"></select>
             </div>
-            <div class="image-preview-box"><img id="prevAbout" src="assets/about.jpg" alt="About Preview"></div>
+            <div class="image-preview-box"><img id="prevAbout" alt="About Preview"></div>
           </div>
 
           <div class="image-select-row">
@@ -969,7 +970,7 @@
               <label class="label" for="selectImgWorking">Booking Area Image</label>
               <select id="selectImgWorking" onchange="updatePreview('selectImgWorking', 'prevWorking')"></select>
             </div>
-            <div class="image-preview-box"><img id="prevWorking" src="assets/working.jpg" alt="Working Preview"></div>
+            <div class="image-preview-box"><img id="prevWorking" alt="Working Preview"></div>
           </div>
         </div>
 
@@ -1701,10 +1702,10 @@
             })(),
             sharedStage: document.getElementById('textContentSharedStage').value,
             selectedShows: document.getElementById('textContentSelectedShows').value,
-            imgHeader: document.getElementById('selectImgHeader').value || localContent.imgHeader || "assets/header.jpg",
-            imgHeaderMobile: document.getElementById('selectImgHeaderMobile').value, // "" = same as desktop
-            imgAbout: document.getElementById('selectImgAbout').value || localContent.imgAbout || "assets/about.jpg",
-            imgWorking: document.getElementById('selectImgWorking').value || localContent.imgWorking || "assets/working.jpg",
+            imgHeader: versionedAsset(document.getElementById('selectImgHeader').value) || localContent.imgHeader || "assets/header.jpg",
+            imgHeaderMobile: versionedAsset(document.getElementById('selectImgHeaderMobile').value), // "" = same as desktop
+            imgAbout: versionedAsset(document.getElementById('selectImgAbout').value) || localContent.imgAbout || "assets/about.jpg",
+            imgWorking: versionedAsset(document.getElementById('selectImgWorking').value) || localContent.imgWorking || "assets/working.jpg",
             whatsNewActive: whatsNewActive,
             whatsNewTitle: document.getElementById('whatsNewTitle').value.trim() || "What's New?",
             whatsNewHeadline: whatsNewHeadline,
@@ -2066,6 +2067,16 @@
       });
     }
 
+    // Image paths are saved with a version tag (?v=…) taken from the file itself.
+    // If a picture is replaced under the same file name, the tag changes → browsers and
+    // GitHub's cache load the new picture immediately instead of showing the old one.
+    function assetPath(p) { return String(p || '').split('?')[0]; }
+    function versionedAsset(path) {
+      if (!path) return '';
+      const file = availableAssets.find(f => f.path === assetPath(path));
+      return file && file.sha ? `${file.path}?v=${file.sha.slice(0, 8)}` : path;
+    }
+
     function populateImageDropdowns() {
       const dropdowns = [
         { id: 'selectImgHeader', current: localContent.imgHeader || 'assets/header.jpg', prevId: 'prevHeader' },
@@ -2076,7 +2087,8 @@
       dropdowns.forEach(item => {
         const select = document.getElementById(item.id);
         select.innerHTML = availableAssets.map(file => {
-          const selected = (file.path === item.current || file.name === item.current) ? 'selected' : '';
+          const cur = assetPath(item.current);
+          const selected = (file.path === cur || file.name === cur) ? 'selected' : '';
           return `<option value="${escapeHtml(file.path)}" ${selected}>${escapeHtml(file.name)}</option>`;
         }).join('');
         updatePreview(item.id, item.prevId);
@@ -2084,7 +2096,7 @@
 
       // Mobile header: optional, first option falls back to the desktop image
       const mobileSelect = document.getElementById('selectImgHeaderMobile');
-      const mobileCurrent = localContent.imgHeaderMobile || '';
+      const mobileCurrent = assetPath(localContent.imgHeaderMobile);
       mobileSelect.innerHTML = '<option value="">Same as desktop</option>' + availableAssets.map(file => {
         const selected = (file.path === mobileCurrent || file.name === mobileCurrent) ? 'selected' : '';
         return `<option value="${escapeHtml(file.path)}" ${selected}>${escapeHtml(file.name)}</option>`;

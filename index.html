@@ -59,7 +59,20 @@
 
   <link rel="stylesheet" href="css/enaly.css?v=20261106a">
 
+
+  <!-- Start loading content.json right away: it says which images to show,
+       so no old/default picture flashes up before the chosen one -->
+  <script>
+    window.enalyContent = fetch('data/content.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+  </script>
+
   <style>
+
+    /* images chosen in the admin dashboard: invisible until the right picture has loaded */
+    img[data-dynamic] { opacity: 0; transition: opacity 0.5s ease; }
+    img[data-dynamic].is-loaded { opacity: 1; }
     /* ==================== HOME · page layout ==================== */
     section[id] { scroll-margin-top: calc(var(--nav-h) + 1.5rem); }
 
@@ -114,8 +127,8 @@
         linear-gradient(90deg, rgba(0,0,0,0.55) 0%, transparent 55%);
     }
     @keyframes heroIn {
-      from { transform: scale(1.12); opacity: 0; }
-      to   { transform: scale(1.04); opacity: 1; }
+      from { transform: scale(1.12); }
+      to   { transform: scale(1.04); }
     }
 
     .hero-inner {
@@ -736,8 +749,8 @@
     <div class="hero-media">
       <picture>
         <!-- Mobile header (admin: Images / Layout → Header Banner Image · Mobile); breakpoint matches the mobile hero layout -->
-        <source id="imgHeaderMobile" media="(max-width: 600px)" srcset="assets/header.jpg">
-        <img id="imgHeader" src="assets/header.jpg" alt="Enaly Stage" fetchpriority="high">
+        <source id="imgHeaderMobile" media="(max-width: 600px)">
+        <img id="imgHeader" alt="Enaly Stage" fetchpriority="high" data-dynamic>
       </picture>
     </div>
     <div class="container hero-inner">
@@ -778,7 +791,7 @@
 
         <div class="about-grid">
           <figure class="portrait-frame reveal">
-            <img id="imgAbout" src="assets/about.jpg" alt="Enaly Portrait" loading="lazy">
+            <img id="imgAbout" alt="Enaly Portrait" data-dynamic>
           </figure>
 
           <div class="about-text reveal" id="aboutTextContainer">
@@ -850,7 +863,7 @@
           <div class="booking-left">
             <h3>Want to make some noise together?</h3>
             <p>Send your booking inquiry through the form or email directly to <a href="mailto:info@enaly.de">info@enaly.de</a>.</p>
-            <img id="imgWorking" src="assets/working.jpg" alt="Enaly Working DJ Set" class="booking-working-img" loading="lazy">
+            <img id="imgWorking" alt="Enaly Working DJ Set" class="booking-working-img" data-dynamic>
           </div>
 
           <form id="bookingForm" class="booking-form" novalidate>
@@ -966,20 +979,32 @@
       return /^https?:\/\//i.test(u) ? u : '';
     }
 
+
+    // Show an image chosen in the dashboard; it fades in once loaded (never the old default first)
+    function showImage(img, src) {
+      if (!img || !src) return;
+      const done = () => img.classList.add('is-loaded');
+      img.addEventListener('load', done, { once: true });
+      img.addEventListener('error', done, { once: true });
+      img.src = src;
+      if (img.complete && img.naturalWidth) done();
+    }
+
     // ---------- Content loader (data/content.json) ----------
     async function loadContent() {
       const container = document.getElementById('aboutTextContainer');
       const quote = container.querySelector('.quote-box');
       try {
-        const res = await fetch('data/content.json?t=' + Date.now(), { cache: 'no-store' });
-        if (!res.ok) { container.querySelector('.placeholder')?.remove(); return; }
-        const content = await res.json();
+        const content = (await window.enalyContent) || {};
 
-        if (content.imgHeader) document.getElementById('imgHeader').src = content.imgHeader;
-        // Separate mobile header if set, otherwise phones use the desktop image
-        document.getElementById('imgHeaderMobile').srcset = content.imgHeaderMobile || content.imgHeader || 'assets/header.jpg';
-        if (content.imgAbout) document.getElementById('imgAbout').src = content.imgAbout;
-        if (content.imgWorking) document.getElementById('imgWorking').src = content.imgWorking;
+        // Images: only the ones chosen in the dashboard (defaults only if nothing is set)
+        const header = content.imgHeader || 'assets/header.jpg';
+        // separate mobile header if set, otherwise phones use the desktop image (set before the img, so the browser picks the right one)
+        document.getElementById('imgHeaderMobile').srcset = content.imgHeaderMobile || header;
+        showImage(document.getElementById('imgHeader'), header);
+        showImage(document.getElementById('imgAbout'), content.imgAbout || 'assets/about.jpg');
+        showImage(document.getElementById('imgWorking'), content.imgWorking || 'assets/working.jpg');
+        if (!Object.keys(content).length) { container.querySelector('.placeholder')?.remove(); return; }
 
         container.querySelector('.placeholder')?.remove();
         if (content.about && content.about.trim() !== "") {
