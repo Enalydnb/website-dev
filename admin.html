@@ -1003,7 +1003,7 @@
         <div class="page-head">
           <div>
             <h2>Assets Upload</h2>
-            <p>Images are committed directly to the GitHub repository.</p>
+            <p>Images are optimised automatically (max. 2400 px) and saved to the website.</p>
           </div>
         </div>
 
@@ -1011,9 +1011,9 @@
           <span class="dz-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
           </span>
-          <strong>Upload File (Directly to GitHub)</strong>
-          <p>Click or drop an image here · Supported: JPG, PNG, WEBP, SVG</p>
-          <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFileUpload(this.files)">
+          <strong>Upload Image</strong>
+          <p>Click or drop an image here · JPG, PNG, WebP, GIF · large photos are resized automatically</p>
+          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" aria-label="Choose image to upload" style="display:none;" onchange="handleFileUpload(this.files)">
         </div>
 
         <div class="card glass">
@@ -2260,27 +2260,75 @@
       }
     }
 
-    function handleFileUpload(files) {
+    // Images are made web-ready before uploading: max. 2400 px on the long side, JPG quality 85 %.
+    // A 6 MB photo straight from the phone becomes ~300–600 KB – the website loads much faster.
+    // PNGs keep their transparency, GIFs (animations) and small images stay untouched.
+    const UPLOAD_MAX_EDGE = 2400;
+    const UPLOAD_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+
+    function cleanFileName(name, ext) {
+      const base = String(name).replace(/\.[^.]+$/, '')
+        .normalize('NFKD').replace(/[̀-ͯ]/g, '')        // ü → u
+        .replace(/ß/g, 'ss').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80) || 'image';
+      return `${base}.${ext}`;
+    }
+
+    async function prepareImage(file) {
+      const origExt = (file.name.split('.').pop() || '').toLowerCase().replace('jpeg', 'jpg');
+      const keep = async () => ({ blob: file, name: cleanFileName(file.name, origExt || 'jpg') });
+      if (file.type === 'image/gif') return keep();
+
+      let bitmap;
+      try { bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+      catch (e) { throw new Error('This image format cannot be read. Please use JPG or PNG.'); }
+      const { width, height } = bitmap;
+      const scale = Math.min(1, UPLOAD_MAX_EDGE / Math.max(width, height));
+      if (scale === 1 && file.size < 1.5 * 1024 * 1024 && UPLOAD_TYPES.includes(file.type)) { bitmap.close(); return keep(); }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+
+      const asPng = file.type === 'image/png';                      // keep transparency (logos)
+      const type = asPng ? 'image/png' : 'image/jpeg';
+      const blob = await new Promise(res => canvas.toBlob(res, type, 0.85));
+      if (!blob) throw new Error('Image could not be converted.');
+      return { blob, name: cleanFileName(file.name, asPng ? 'png' : 'jpg') };
+    }
+
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(String(r.result).split(',')[1]);
+        r.onerror = () => reject(new Error('File could not be read.'));
+        r.readAsDataURL(blob);
+      });
+    }
+
+    async function handleFileUpload(files) {
       if (!files || !files.length) return;
       const file = files[0];
-      if (!file.type.startsWith('image/')) return toast('Please choose an image file.', 'error');
-      const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        try {
-          toast(`Uploading ${file.name}...`);
-          const rawBase64 = e.target.result.split(',')[1];
-          const path = `${assetFolderPath}/${file.name}`;
-          await saveGitHubFile(path, rawBase64, `Upload asset ${file.name} via Admin Dashboard`);
-          toast("Image uploaded successfully!");
-          loadAssetsFromGitHub();
-        } catch (err) {
-          toast("Upload error: " + err.message, 'error');
-        } finally {
-          document.getElementById('fileInput').value = '';
-        }
-      };
-      reader.readAsDataURL(file);
+      // some systems give no file type (e.g. ".JPEG" in capitals) → also check the file extension
+      if (!file.type.startsWith('image/') && !/\.(jpe?g|png|webp|gif|avif|heic|heif)$/i.test(file.name)) return toast('Please choose an image file.', 'error');
+      try {
+        toast(`Preparing ${file.name}...`);
+        const { blob, name } = await prepareImage(file);
+        const kb = Math.round(blob.size / 1024);
+        toast(`Uploading ${name} (${kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB'})...`);
+        const path = `${assetFolderPath}/${name}`;
+        await saveGitHubFile(path, await blobToBase64(blob), `Upload asset ${name} via Admin Dashboard`);
+        toast("Image uploaded successfully!");
+        loadAssetsFromGitHub();
+      } catch (err) {
+        toast("Upload error: " + err.message, 'error');
+      } finally {
+        document.getElementById('fileInput').value = '';
+      }
     }
 
     function setupDropzone() {
