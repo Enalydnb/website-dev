@@ -29,10 +29,12 @@
   },
   {
     "date": "30.09.2026",
-    "title": "Beats x Bass x Colonge pres. #MITTWOCHENENDE",
+    "title": "Beats x Bass x Cologne pres. #MITTWOCHENENDE",
     "venue": "Odonien",
     "city": "Colonge, DE",
-    "tickets": ""
+    "tickets": "",
+    "doorsale": false,
+    "soldOut": false
   },
   {
     "date": "16.10.2026",
